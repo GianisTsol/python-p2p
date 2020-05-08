@@ -7,9 +7,32 @@ import time
 import json
 import sys
 
+#don't have to add a lot of peers
+#just one so the node can connect to the network
 peers = ['192.168.1.6']
+maxpeers = 5
+connected_peers = 0
 node1 = None
-sys.path.insert(0, '.')
+PORT = 65432
+
+
+def ConnectToNodes(nn):
+    global connected_peers
+    global peers
+    global maxpeers
+
+    if connected_peers+nn>maxpeers:
+        nn = maxpeers-connected_peers
+
+    if connected_peers >== maxpeers:
+        print("FUCK FUCK FUCK, too much peers, how did this happen?? fuck")
+        return
+    if nn > len(peers):
+        nn = len(peers)
+
+    for i in range(nn):
+        node1.connect_with_node(peers[i], PORT)
+    return
 
 def message(dict):
     buf = json.dumps(dict)
@@ -23,6 +46,7 @@ def peers_packet():
 
 def send_peers():
     node.send_to_nodes(peers_packet())
+    return
 
 def data_handler(data):
     global peers
@@ -32,9 +56,12 @@ def data_handler(data):
         new = [i for i in peers if i not in dta["peers"]]
         peers = dta["peers"] + new
         print("new neighbours: " + str(new))
+        ConnectToNodes(len(new)) # cpnnect to new nodes
+        return
     elif "msg" in dta:
         print("msg: " + dta["msg"])
         node.send_to_nodes(dta)
+        return
 
 def node_callback(event, node, other, data):
     if (event == 'node_request_to_stop'):
@@ -53,10 +80,11 @@ def node_callback(event, node, other, data):
     else:
         print("NODE (" + node.getName() + "): Event is not known " + event + "\n")
 
-node = Node("", 65432, node_callback)
+node = Node("", PORT, node_callback) # start the node
 node.start()
 time.sleep(1)
 
+ConnectToNodes(1) # connect to the start node to enter the network
 while 1:
     buf = str(message({'msg': "test123"}))
     node.send_to_nodes(buf)
