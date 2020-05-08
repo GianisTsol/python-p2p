@@ -58,7 +58,7 @@ class peer():
             new = [i for i in peers if i not in dta["peers"]]
             peers = dta["peers"] + new
             print("new neighbours: " + str(new))
-            ConnectToNodes(len(new)) # cpnnect to new nodes
+            self.ConnectToNodes(len(new)) # cpnnect to new nodes
             return
         elif "msg" in dta:
             print("msg: " + dta["msg"])
@@ -75,10 +75,10 @@ class peer():
         elif ( event == "outbound_node_connected" ):
             print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
         elif ( event == "inbound_node_connected" ):
-            send_peers()
+            self.send_peers()
             print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
         elif ( event == "node_message" ):
-            data_handler(data.encode('utf-8'))
+            self.data_handler(data.encode('utf-8'))
         else:
             print("NODE (" + node.getName() + "): Event is not known " + event + "\n")
 
