@@ -27,6 +27,7 @@ def ConnectToNodes(nn):
     if nn > len(peers):
         nn = len(peers)
     for i in range(nn):
+        print('connecting with {}'.format(peers[i]))
         node.connect_with_node(peers[i], PORT)
     return
 def message(dict):
@@ -42,7 +43,7 @@ def send_peers():
     return
 def data_handler(data):
     global peers
-    dta = {'test': 'lol'}
+    dta = {}
     dta = json.loads(data)
     if "peers" in dta:
         new = [i for i in peers if i not in dta["peers"]]
@@ -51,7 +52,7 @@ def data_handler(data):
         ConnectToNodes(len(new)) # cpnnect to new nodes
         return
     elif "msg" in dta:
-        print("msg: " + dta["msg"])
+        print(time.ctime() + " msg: " + dta["msg"])
         node.send_to_nodes(dta)
         return
 def node_callback(event, node, other, data):
