@@ -8,5 +8,5 @@ The code provides a simple network structure for information exchange between pe
 # usage
 
 ```
-pyton3 node.py
+pyton3 main.py
 ```
