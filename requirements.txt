@@ -1,3 +1,2 @@
-pkg-resources==0.0.0
-sockets==1.0.0
+socket
 p2pnetwork
