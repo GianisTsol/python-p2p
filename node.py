@@ -17,7 +17,7 @@ connected_peers = 0
 # The port that the server will run on.
 PORT = 65432
 # The ip that will be removed if found in the peers list
-myip='192.168.1.20'
+myip='2.87.135.26'
 
 def ConnectToNodes(nn):
     global connected_peers
@@ -63,21 +63,24 @@ def data_handler(data, n):
         node.send_to_nodes(dta, [n])
         return
 def node_callback(event, node, other, data):
-    if (event == 'node_request_to_stop'):
-        print("node request to stop")
-    elif ( event == "inbound_node_disconnected" ):
-        print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
-    elif ( event == "outbound_node_disconnected" ):
-        print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
-    elif ( event == "outbound_node_connected" ):
-        print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
-    elif ( event == "inbound_node_connected" ):
-        send_peers()
-        print("NODE (" + node.getName() + "): " + "event:" + event + "\n")
+    global peers
+    if ("disconnected" in event):
+        if node.nodeip in peers:
+            peers.remove(node.nodeip)
+        print(event + "\n")
+    elif ("connected" in event):
+        if (event=="inbound_node_connected"):
+            send_peers()
+        print("the node's address is:" + str(node.nodeip))
+        if node.nodeip not in peers:
+            peers.append(node.nodeip)
+        print(event + "\n")
     elif ( event == "node_message" ):
         data_handler(data.encode('utf-8'), other)
     else:
-        print("NODE (" + node.getName() + "): Event is not known " + event + "\n")
+        print(event + "\n")
+
+    print(peers)
 
 node = Node("", PORT, node_callback) # start the node
 node.start()

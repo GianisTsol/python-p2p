@@ -21,8 +21,8 @@ class Node(threading.Thread):
     """Implements a node that is able to connect to other nodes and is able to accept connections from other nodes.
     After instantiation, the node creates a TCP/IP server with the given port.
 
-    Create instance of a Node. If you want to implement the Node functionality with a callback, you should 
-    provide a callback method. It is preferred to implement a new node by extending this Node class. 
+    Create instance of a Node. If you want to implement the Node functionality with a callback, you should
+    provide a callback method. It is preferred to implement a new node by extending this Node class.
       host: The host name or ip address that is used to bind the TCP/IP server to.
       port: The port number that is used to bind the TCP/IP server to.
       callback: (optional) The callback that is invokes when events happen inside the network
@@ -33,8 +33,8 @@ class Node(threading.Thread):
                  data: The data that is send by the connected node."""
 
     def __init__(self, host, port, callback=None):
-        """Create instance of a Node. If you want to implement the Node functionality with a callback, you should 
-           provide a callback method. It is preferred to implement a new node by extending this Node class. 
+        """Create instance of a Node. If you want to implement the Node functionality with a callback, you should
+           provide a callback method. It is preferred to implement a new node by extending this Node class.
             host: The host name or ip address that is used to bind the TCP/IP server to.
             port: The port number that is used to bind the TCP/IP server to.
             callback: (optional) The callback that is invokes when events happen inside the network."""
@@ -100,7 +100,7 @@ class Node(threading.Thread):
 
     def delete_closed_connections(self):
         """Misleading function name, while this function checks whether the connected nodes have been terminated
-           by the other host. If so, clean the array list of the nodes. When a connection is closed, an event is 
+           by the other host. If so, clean the array list of the nodes. When a connection is closed, an event is
            send node_message or outbound_node_disconnected."""
         for n in self.nodes_inbound:
             if n.terminate_flag.is_set():
@@ -147,7 +147,7 @@ class Node(threading.Thread):
             self.debug_print("Node send_to_node: Could not send the data, node is not found!")
 
     def connect_with_node(self, host, port):
-        """ Make a connection with another node that is running on host with port. When the connection is made, 
+        """ Make a connection with another node that is running on host with port. When the connection is made,
             an event is triggered outbound_node_connected. When the connection is made with the node, it exchanges
             the id's of the node. First we send our id and then we receive the id of the node we are connected to.
             When the connection is made the method outbound_node_connected is invoked.
@@ -182,7 +182,7 @@ class Node(threading.Thread):
 
     def disconnect_with_node(self, node):
         """Disconnect the TCP/IP connection with the specified node. It stops the node and joins the thread.
-           The node will be deleted from the nodes_outbound list. Before closing, the method 
+           The node will be deleted from the nodes_outbound list. Before closing, the method
            node_disconnect_with_outbound_node is invoked."""
         if node in self.nodes_outbound:
             self.node_disconnect_with_outbound_node(node)
@@ -204,6 +204,7 @@ class Node(threading.Thread):
            to create the actual new connection. The reason for this method is to be able to override the
            connection class if required. In this case a NodeConnection will be instantiated to represent
            the node connection."""
+        self.nodeip = host
         return NodeConnection(self, connection, id, host, port)
 
     def run(self):
@@ -215,7 +216,7 @@ class Node(threading.Thread):
             try:
                 self.debug_print("Node: Wait for incoming connection")
                 connection, client_address = self.sock.accept()
-                
+
                 # Basic information exchange (not secure) of the id's of the nodes!
                 connected_node_id = str(connection.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
                 connection.send(self.id.encode('utf-8')) # Send my id to the connected node!
@@ -226,7 +227,7 @@ class Node(threading.Thread):
                 self.nodes_inbound.append(thread_client)
 
                 self.inbound_node_connected(thread_client)
-                
+
             except socket.timeout:
                 self.debug_print('Node: Connection timeout!')
 
