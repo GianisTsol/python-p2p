@@ -1,4 +1,5 @@
-print(str("""           ---Python p2p node by GTsol---
+print(str("""
+           ---Python p2p node by GTsol---
     Please make sure the latest version is installed
             older versions may contain bugs
 

@@ -1,2 +1,1 @@
-socket
-p2pnetwork
+p2pnetwork==0.0.2

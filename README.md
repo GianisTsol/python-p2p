@@ -10,7 +10,7 @@ The code provides a simple network structure for information exchange between pe
 ```
 pip3 install -r requirements.txt
 ```
-note: requires python 3.6+
+note: tested on python 3.6
 #### Start the node:
 ```
 pyton3 main.py

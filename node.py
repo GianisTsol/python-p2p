@@ -51,7 +51,8 @@ def data_handler(data, n):
     dta = json.loads(data)
     if "peers" in dta:
         new = [i for i in peers if i not in dta["peers"]]
-        new.remove(myip) # remove your ip so it will not connect to itself
+        if myip in new:
+                new.remove(myip) # remove your ip so it will not connect to itself
         peers = dta["peers"] + new
         print("new neighbours: " + str(new))
         print("peers: " + str(peers))
