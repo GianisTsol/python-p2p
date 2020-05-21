@@ -6,6 +6,8 @@ from p2pnetwork.node import Node
 import time
 import json
 import sys
+from requests import get
+
 
 #don't have to add a lot of peers
 #just one so the node can connect to the network
@@ -17,7 +19,8 @@ connected_peers = 0
 # The port that the server will run on.
 PORT = 65432
 # The ip that will be removed if found in the peers list
-myip='2.87.135.26'
+myip = get('https://api.ipify.org').text
+print("Public IP: " + myip)
 
 def ConnectToNodes(nn):
     global connected_peers
@@ -69,6 +72,9 @@ def node_callback(event, node, other, data):
             peers.remove(node.nodeip)
         print(event + "\n")
     elif ("connected" in event):
+        if other.id == node.id:
+            myip = other.nodeip
+            other.disconnect()
         if (event=="inbound_node_connected"):
             send_peers()
         print("the node's address is:" + str(node.nodeip))
