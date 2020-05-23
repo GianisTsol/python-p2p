@@ -75,6 +75,7 @@ def node_callback(event, node, other, data):
         if node.nodeip in peers:
             peers.remove(node.nodeip)
         print(event + "\n")
+        connected_peers = connected_peers -1
     elif ("connected" in event):
         if other.id == node.id:
             myip = node.nodeip
@@ -89,6 +90,7 @@ def node_callback(event, node, other, data):
         if node.nodeip not in peers:
             peers.append(node.nodeip)
         print(event + "\n")
+        connected_peers = connected_peers +1
     elif ( event == "node_message" ):
         data_handler(data.encode('utf-8'), other)
     else:
