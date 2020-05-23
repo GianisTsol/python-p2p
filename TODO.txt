@@ -1,7 +1,7 @@
 - Implement data requesting between nodes
 
-- Implement message filtering to prevent network flooding
+- Implement message filtering to prevent network flooding - DONE!
 
-- Implement better message system i.e. {msg, sender, recipient, msgID}
+- Implement better message system i.e. {msg, sender, recipient, time}
 
-- Get public ip from other nodes, not an api
+- Get public ip from other nodes, not an api - DONE!

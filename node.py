@@ -16,6 +16,8 @@ peers = ['192.168.1.20']
 maxpeers = 5
 # Currently connected peers
 connected_peers = 0
+#time to wait until a message will stop being forwarded - in seconds
+msg_del_time = 600
 # The port that the server will run on.
 PORT = 65432
 #your ip that others connect to
@@ -39,7 +41,14 @@ def ConnectToNodes(nn):
         print('connecting with {}'.format(peers[i]))
         node.connect_with_node(peers[i], PORT)
     return
-def message(dict, ex=[]):
+
+def message(dicts, ex=[]):
+    dict = {}
+    dict = dicts
+    #time that the message was sent
+    dict['time'] = str(time.time())
+    #sender node id
+    dict['snid'] = str(node.id)
     buf = json.dumps(dict)
     node.send_to_nodes(buf, ex)
     return
@@ -50,12 +59,12 @@ def send_peers():
     message(buf)
     return
 
-
 def data_handler(data, n):
     global peers
     dta = {}
     dta = json.loads(data)
     if "peers" in dta:
+        #peers handling
         new = [i for i in peers if i not in dta["peers"]]
         if myip in new:
                 new.remove(myip) # remove your ip so it will not connect to itself
@@ -65,9 +74,16 @@ def data_handler(data, n):
         ConnectToNodes(len(new)) # cpnnect to new nodes
         return
     elif "msg" in dta:
+        #handle message data.
         print(time.ctime() + " msg: " + dta["msg"])
-        message(dta, [n])
+        #check if the message hasn't expired.
+        if time.ctime() - int(dta['time']) < msg_del_time:
+            message(dta, [n])
+        else:
+            #if message is expired
+            print("expired:" + dta['msg'])
         return
+
 def node_callback(event, node, other, data):
     global connected_peers
     print("connected peers: " + str(connected_peers))
@@ -83,7 +99,6 @@ def node_callback(event, node, other, data):
             #print("connected to ourselves, ip: " + node.nodeip)
             if node.nodeip in peers:
                 peers.remove(node.nodeip)
-
             node.disconnect_with_node(other)
         if (event=="inbound_node_connected"):
             send_peers()
