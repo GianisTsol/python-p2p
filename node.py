@@ -11,7 +11,7 @@ from requests import get
 
 #don't have to add a lot of peers
 #just one so the node can connect to the network
-peers = ['192.168.1.6']
+peers = ['192.168.1.20']
 # The maximum amount of peers that can connect to the node
 maxpeers = 5
 # Currently connected peers
@@ -69,6 +69,7 @@ def data_handler(data, n):
         message(dta, [n])
         return
 def node_callback(event, node, other, data):
+    global connected_peers
     print("connected peers: " + str(connected_peers))
     global peers
     if ("disconnected" in event):
