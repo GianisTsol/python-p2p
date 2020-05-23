@@ -11,16 +11,18 @@ from requests import get
 
 #don't have to add a lot of peers
 #just one so the node can connect to the network
-peers = []
+peers = ['192.168.1.6']
 # The maximum amount of peers that can connect to the node
 maxpeers = 5
 # Currently connected peers
 connected_peers = 0
 # The port that the server will run on.
 PORT = 65432
-# The ip that will be removed if found in the peers list
-myip = get('https://api.ipify.org').text
-print("Public IP: " + myip)
+#your ip that others connect to
+myip = ''
+#uncomment these two lines to get public ip from external server.
+#myip = get('https://api.ipify.org').text
+#print("Public IP: " + myip)
 
 def ConnectToNodes(nn):
     global connected_peers
@@ -37,17 +39,18 @@ def ConnectToNodes(nn):
         print('connecting with {}'.format(peers[i]))
         node.connect_with_node(peers[i], PORT)
     return
-def message(dict):
+def message(dict, ex=[]):
     buf = json.dumps(dict)
-    return buf
-def peers_packet():
+    node.send_to_nodes(buf, ex)
+    return
+
+def send_peers():
     global peers
     buf = {'peers': peers}
-    buf = json.dumps(buf)
-    return buf
-def send_peers():
-    node.send_to_nodes(peers_packet())
+    message(buf)
     return
+
+
 def data_handler(data, n):
     global peers
     dta = {}
@@ -57,15 +60,16 @@ def data_handler(data, n):
         if myip in new:
                 new.remove(myip) # remove your ip so it will not connect to itself
         peers = dta["peers"] + new
-        print("new neighbours: " + str(new))
+        #print("new neighbours: " + str(new))
         print("peers: " + str(peers))
         ConnectToNodes(len(new)) # cpnnect to new nodes
         return
     elif "msg" in dta:
         print(time.ctime() + " msg: " + dta["msg"])
-        node.send_to_nodes(dta, [n])
+        message(dta, [n])
         return
 def node_callback(event, node, other, data):
+    print("connected peers: " + str(connected_peers))
     global peers
     if ("disconnected" in event):
         if node.nodeip in peers:
@@ -73,11 +77,13 @@ def node_callback(event, node, other, data):
         print(event + "\n")
     elif ("connected" in event):
         if other.id == node.id:
-            myip = other.nodeip
-            other.disconnect()
+            myip = node.nodeip
+            #print("connected to ourselves, ip: " + node.nodeip)
+            peers.remove(node.nodeip)
+            node.disconnect_with_node(other)
         if (event=="inbound_node_connected"):
             send_peers()
-        print("the node's address is:" + str(node.nodeip))
+        print("the node's address is: " + str(node.nodeip))
         if node.nodeip not in peers:
             peers.append(node.nodeip)
         print(event + "\n")
