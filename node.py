@@ -7,7 +7,7 @@ import time
 import json
 import sys
 from requests import get
-
+import data_request_management as dtrm
 
 #don't have to add a lot of peers
 #just one so the node can connect to the network
@@ -17,8 +17,9 @@ maxpeers = 5
 # Currently connected peers
 connected_peers = 0
 #time to wait until a message will stop being forwarded - in seconds
-msg_del_time = 600
+msg_del_time = 30
 # The port that the server will run on.
+#To form a single network, please, do not change this
 PORT = 65432
 #your ip that others connect to
 myip = ''
@@ -53,6 +54,9 @@ def message(dicts, ex=[]):
     node.send_to_nodes(buf, ex)
     return
 
+def req_file(hash):
+    message({'req': hash})
+
 def send_peers():
     global peers
     buf = {'peers': peers}
@@ -83,6 +87,16 @@ def data_handler(data, n):
             #if message is expired
             print("expired:" + dta['msg'])
         return
+    elif "req" in dta:
+        if dtrm.has_file(dta['req']):
+            message({"resp": hash})
+
+        else:
+            print("recieved request for file: " + dta['req'] + " but we do not have it.")
+
+    elif "resp" in dta:
+        print("node: " + dta['snid']+"has file " + dta['resp'])
+        print("Downloading files will be added in another version")
 
 def node_callback(event, node, other, data):
     global connected_peers
