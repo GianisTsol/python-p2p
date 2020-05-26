@@ -43,15 +43,17 @@ def ConnectToNodes(nn):
         node.connect_with_node(peers[i], PORT)
     return
 
-def message(dicts, ex=[]):
+def message(dicts, node=None, ex=[]):
     dict = {}
     dict = dicts
     #time that the message was sent
     dict['time'] = str(time.time())
     #sender node id
-    dict['snid'] = str(node.id)
+    if node != None:
+        dict['snid'] = str(node.id)
     buf = json.dumps(dict)
-    node.send_to_nodes(buf, ex)
+    if node != None:
+        node.send_to_nodes(buf, ex)
     return
 
 def req_file(hash):
@@ -82,7 +84,7 @@ def data_handler(data, n):
         print(time.ctime() + " msg: " + dta["msg"])
         #check if the message hasn't expired.
         if time.ctime() - int(dta['time']) < msg_del_time:
-            message(dta, [n])
+            message(dta, ex=[n])
         else:
             #if message is expired
             print("expired:" + dta['msg'])
