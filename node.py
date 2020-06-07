@@ -43,7 +43,7 @@ def ConnectToNodes(nn):
         node.connect_with_node(peers[i], PORT)
     return
 
-def message(dicts, node=None, ex=[]):
+def message(dicts, ex=[]):
     dict = {}
     dict = dicts
     #time that the message was sent
@@ -54,7 +54,6 @@ def message(dicts, node=None, ex=[]):
     buf = json.dumps(dict)
     if node != None:
         node.send_to_nodes(buf, ex)
-    return
 
 def req_file(hash):
     message({'req': hash})
@@ -83,8 +82,8 @@ def data_handler(data, n):
         #handle message data.
         print(time.ctime() + " msg: " + dta["msg"])
         #check if the message hasn't expired.
-        if time.ctime() - int(dta['time']) < msg_del_time:
-            message(dta, ex=[n])
+        if float(time.time()) - float(dta['time']) < float(msg_del_time):
+            message(dta, ex=n)
         else:
             #if message is expired
             print("expired:" + dta['msg'])
@@ -111,11 +110,12 @@ def node_callback(event, node, other, data):
         connected_peers = connected_peers -1
     elif ("connected" in event):
         if other.id == node.id:
-            myip = node.nodeip
+            #myip = node.nodeip
+            myip = ''
             #print("connected to ourselves, ip: " + node.nodeip)
-            if node.nodeip in peers:
-                peers.remove(node.nodeip)
-            node.disconnect_with_node(other)
+            #if node.nodeip in peers:
+                #peers.remove(node.nodeip)
+            #node.disconnect_with_node(other)
         if (event=="inbound_node_connected"):
             send_peers()
         print("the node's address is: " + str(node.nodeip))
@@ -124,7 +124,7 @@ def node_callback(event, node, other, data):
         print(event + "\n")
         connected_peers = connected_peers +1
     elif ( event == "node_message" ):
-        data_handler(data.encode('utf-8'), other)
+        data_handler(data, [other, node])
     else:
         print(event + "\n")
 

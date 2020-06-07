@@ -4,7 +4,7 @@ import time
 import threading
 import random
 import hashlib
-
+import json
 from p2pnetwork.nodeconnection import NodeConnection
 
 """
@@ -106,13 +106,15 @@ class Node(threading.Thread):
             if n.terminate_flag.is_set():
                 self.inbound_node_disconnected(n)
                 n.join()
-                del self.nodes_inbound[self.nodes_inbound.index(n)]
+                if self.nodes_inbound.index(n) in self.nodes_inbound:
+                    del self.nodes_inbound[self.nodes_inbound.index(n)]
 
         for n in self.nodes_outbound:
             if n.terminate_flag.is_set():
                 self.outbound_node_disconnected(n)
                 n.join()
-                del self.nodes_outbound[self.nodes_inbound.index(n)]
+                if self.nodes_inbound.index(n) in self.nodes_outbound:
+                    del self.nodes_outbound[self.nodes_inbound.index(n)]
 
     def send_to_nodes(self, data, exclude=[]):
         """ Send a message to all the nodes that are connected with this node. data is a python variable which is
@@ -138,8 +140,8 @@ class Node(threading.Thread):
         if n in self.nodes_inbound or n in self.nodes_outbound:
             try:
                 #Obsolete while this uses JSON format, the user of the module decide what to do!
-                #n.send(self.create_message(data))
-                n.send(data)
+                n.send(json.dumps(data))
+                #n.send(data)
 
             except Exception as e:
                 self.debug_print("Node send_to_node: Error while sending data to the node (" + str(e) + ")")
@@ -282,9 +284,9 @@ class Node(threading.Thread):
 
     def node_message(self, node, data):
         """This method is invoked when a node send us a message."""
-        self.debug_print("node_message: " + node.id + ": " + str(data))
+        self.debug_print("node_message: " + node.id + ": " + json.loads(data))
         if self.callback is not None:
-            self.callback("node_message", self, node, data)
+            self.callback("node_message", self, node, json.loads(data))
 
     def node_disconnect_with_outbound_node(self, node):
         """This method is invoked just before the connection is closed with the outbound node. From the node
