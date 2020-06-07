@@ -110,12 +110,11 @@ def node_callback(event, node, other, data):
         connected_peers = connected_peers -1
     elif ("connected" in event):
         if other.id == node.id:
-            #myip = node.nodeip
-            myip = ''
-            #print("connected to ourselves, ip: " + node.nodeip)
-            #if node.nodeip in peers:
-                #peers.remove(node.nodeip)
-            #node.disconnect_with_node(other)
+            myip = node.nodeip
+            print("connected to ourselves, ip: " + node.nodeip)
+            if node.nodeip in peers:
+                peers.remove(node.nodeip)
+            node.disconnect_with_node(other)
         if (event=="inbound_node_connected"):
             send_peers()
         print("the node's address is: " + str(node.nodeip))
