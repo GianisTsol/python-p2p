@@ -11,7 +11,7 @@ import data_request_management as dtrm
 
 #don't have to add a lot of peers
 #just one so the node can connect to the network
-peers = ['192.168.1.20']
+peers = ['192.168.1.11']
 # The maximum amount of peers that can connect to the node
 maxpeers = 5
 # Currently connected peers
@@ -89,7 +89,7 @@ def data_handler(data, n):
             print("expired:" + dta['msg'])
         return
     elif "req" in dta:
-        if dtrm.has_file(dta['req']):
+        if dtrm.have_file(dta['req']):
             message({"resp": hash})
 
         else:
@@ -131,3 +131,24 @@ def node_callback(event, node, other, data):
 
 node = Node("", PORT, node_callback) # start the node
 node.start()
+
+while True:
+    cmd = input(">")
+    if "connect " in cmd:
+        args = cmd.replace("connect ", "")
+        print("connect to: " + args)
+        node.connect_with_node(args, PORT)
+    if cmd == "stop":
+        node.stop()
+    if cmd == "exit":
+        node.stop()
+        exit(0)
+    if "msg " in cmd:
+        args = cmd.replace("msg ", "")
+        print("message: " + args)
+        message({'msg': args})
+
+    if "req " in cmd:
+        args = cmd.replace("request ", "")
+        print("requesting file with hash: " + args)
+        message({'req': args})

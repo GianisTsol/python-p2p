@@ -21,7 +21,7 @@ from node import *
 from p2pnetwork.node import Node
 import time
 
-ConnectToNodes(1) # connect to the start node to enter the network
+#ConnectToNodes(1) # connect to the start node to enter the network
 while 1:
     message({'msg': "test123"})
     time.sleep(5)

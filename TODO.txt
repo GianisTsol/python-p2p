@@ -5,3 +5,5 @@
 - Implement better message system i.e. {msg, sender, recipient, time} - DONE! (recipient atribute will be added with the data requesting feature)
 
 - Get public ip from other nodes, not an api - DONE!
+
+- Add user interface with commands

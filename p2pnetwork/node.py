@@ -64,7 +64,7 @@ class Node(threading.Thread):
         self.id = id.hexdigest()
 
         # Start the TCP/IP server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.SO_REUSEADDR)
         self.init_server()
 
         # Message counters to make sure everyone is able to track the total messages
