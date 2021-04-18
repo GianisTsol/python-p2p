@@ -64,7 +64,7 @@ class Node(threading.Thread):
         self.id = id.hexdigest()
 
         # Start the TCP/IP server
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.SO_REUSEADDR)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.init_server()
 
         # Message counters to make sure everyone is able to track the total messages
@@ -113,8 +113,12 @@ class Node(threading.Thread):
             if n.terminate_flag.is_set():
                 self.outbound_node_disconnected(n)
                 n.join()
-                if self.nodes_inbound.index(n) in self.nodes_outbound:
-                    del self.nodes_outbound[self.nodes_inbound.index(n)]
+                if n in self.nodes_inbound:
+                    if self.nodes_inbound.index(n) in self.nodes_outbound:
+                        try:
+                            del self.nodes_outbound[self.nodes_inbound.index(n)]
+                        except:
+                            print("Can't del. line 119 p2pnetwork/node.py - temporary fix")
 
     def send_to_nodes(self, data, exclude=[]):
         """ Send a message to all the nodes that are connected with this node. data is a python variable which is

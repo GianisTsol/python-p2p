@@ -18,13 +18,13 @@ Python package p2pnet for implementing decentralized peer-to-peer network applic
 """
 
 class SecureNode (Node):
-    """This class is a concrete implementation of the node class and communicates with JSON between the nodes. 
+    """This class is a concrete implementation of the node class and communicates with JSON between the nodes.
     It implements a secure communication between the nodes. Not that the communication is encrypted, but
     more on the tampering aspect. Messages are checked on the integrity (due to signing). A public/private
     RSA key infrastructure is used to implement this. Furthermore, it implements a basic ping/pong system and
     discovery. Using this node, you are able to implement your own protocol on top. All messages that are send
     (make sure you use create_message method) are signed and checked when received.
-    
+
     Instantiates a SecureNode that extends the Node class by secure functionality.
       host: The host name or ip address that is used to bind the TCP/IP server to.
       port: The port number that is used to bind the TCP/IP server to."""
@@ -66,7 +66,7 @@ class SecureNode (Node):
 
                     elif (data['_type'] == 'pong'):
                         self.received_pong(connected_node, data)
-                        
+
                     elif (data['_type'] == 'discovery'):
                         self.received_discovery(connected_node, data)
 
@@ -81,7 +81,7 @@ class SecureNode (Node):
 
         except Exception as e:
             self.debug_print("NodeConnection: Data could not be parsed (%s) (%s)" % (message, str(e)))
-               
+
     def create_message(self, data):
         """This method creates the message based on the Python dict data variable to be sent to other nodes. Some data
            is added to the data, like the id, timestamp, message is and hash of the message. In order to check the
@@ -138,7 +138,7 @@ class SecureNode (Node):
         del data['_public_key']
         del data['_signature']
         checkSignature = self.verify_data(data, public_key, signature)
-        
+
         # 2. Check the hash of the data
         del data['_hash']
         checkDataHash = (self.get_hash(data) == data_hash)
@@ -167,11 +167,11 @@ class SecureNode (Node):
         self.send_to_nodes(self.create_message({ "message": message }))
 
     def get_data_uniq_string(self, data):
-        """This function makes sure that a complex dict variable (consisting of other dicts and lists, 
+        """This function makes sure that a complex dict variable (consisting of other dicts and lists,
            is converted to a unique string that can be hashed. Every data object that contains the same
            values, should result into the dame unique string."""
         return json.dumps(data, sort_keys=True)
-        
+
     def get_hash(self, data):
         """Returns the hased version of the data dict. The dict can contain lists and dicts, but it must
            be based as dict."""
@@ -239,7 +239,7 @@ class SecureNode (Node):
     def sign_data(self, data):
         """Sign the data (a Python dict), that is hashed, with our private key. It is converted
            to a string, so the method sign can be used."""
-        message = self.get_data_uniq_string(data)        
+        message = self.get_data_uniq_string(data)
         return self.sign(message)
 
     def verify(self, message, public_key, signature):
@@ -249,10 +249,10 @@ class SecureNode (Node):
             key = RSA.importKey(public_key)
             h = SHA512.new(message.encode('utf-8'))
             verifier = PKCS1_v1_5_Signature.new(key)
-            
+
             self.debug_print("Message to verify: " + message)
             self.debug_print("Hash of the message: " + h.hexdigest())
-            
+
             return verifier.verify(h, signature)
 
         except Exception as e:
@@ -320,7 +320,7 @@ class SecureNode (Node):
 
     def received_discovery_answer(self, node, data):
         """This method processes the discovery_answer packet. In the case it is not mine, the packet is relayed
-           to the correct node. Nothing is done with this information. 
+           to the correct node. Nothing is done with this information.
            TODO: A method to process this information should be invoked."""
         if data['id'] in self.discovery_messages: # needs to be relayed
             self.send_discovery_answer(self.discovery_messages[data['id']], data)

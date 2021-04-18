@@ -10,8 +10,7 @@ from requests import get
 import data_request_management as dtrm
 
 #don't have to add a lot of peers
-#just one so the node can connect to the network
-peers = ['192.168.1.11']
+peers = []
 # The maximum amount of peers that can connect to the node
 maxpeers = 5
 # Currently connected peers
@@ -21,11 +20,33 @@ msg_del_time = 30
 # The port that the server will run on.
 #To form a single network, please, do not change this
 PORT = 65432
+
+###########################################################
+
 #your ip that others connect to
 myip = ''
 #uncomment these two lines to get public ip from external server.
 #myip = get('https://api.ipify.org').text
 #print("Public IP: " + myip)
+
+
+saveData = {}
+
+def exportPeers():
+    saveData["peers"] = peers
+    print(saveData)
+    with open('state.json', 'w') as prev:
+        json.dump(saveData, prev)
+        prev.close()
+
+def load():
+        with open('state.json', 'rb') as prev:
+            saveData = json.load(prev)
+            print(saveData)
+            peers = saveData["peers"]
+            prev.close()
+            ConnectToNodes(len(peers))
+
 
 def ConnectToNodes(nn):
     global connected_peers
@@ -65,6 +86,7 @@ def send_peers():
     return
 
 def data_handler(data, n):
+    print("Own ip: " + myip)
     global peers
     dta = {}
     dta = json.loads(data)
@@ -117,6 +139,9 @@ def node_callback(event, node, other, data):
             node.disconnect_with_node(other)
         if (event=="inbound_node_connected"):
             send_peers()
+
+        if (event=="outbound_node_connected"):
+            send_peers()
         print("the node's address is: " + str(node.nodeip))
         if node.nodeip not in peers:
             peers.append(node.nodeip)
@@ -138,11 +163,16 @@ while True:
         args = cmd.replace("connect ", "")
         print("connect to: " + args)
         node.connect_with_node(args, PORT)
+
     if cmd == "stop":
+        exportPeers()
         node.stop()
+
     if cmd == "exit":
+        exportPeers()
         node.stop()
         exit(0)
+
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
         print("message: " + args)
@@ -152,3 +182,9 @@ while True:
         args = cmd.replace("request ", "")
         print("requesting file with hash: " + args)
         message({'req': args})
+
+    if cmd == "save":
+        exportPeers()
+
+    if cmd == "load":
+        load()

@@ -12,13 +12,13 @@ Version: 0.2 beta (use at your own risk!)
 Python package p2pnet for implementing decentralized peer-to-peer network applications
 """
 class NodeConnection(threading.Thread):
-    """The class NodeConnection is used by the class Node and represent the TCP/IP socket connection with another node. 
+    """The class NodeConnection is used by the class Node and represent the TCP/IP socket connection with another node.
        Both inbound (nodes that connect with the server) and outbound (nodes that are connected to) are represented by
        this class. The class contains the client socket and hold the id information of the connecting node. Communication
        is done by this class. When a connecting node sends a message, the message is relayed to the main node (that created
        this NodeConnection in the first place).
-       
-       Instantiates a new NodeConnection. Do not forget to start the thread. All TCP/IP communication is handled by this 
+
+       Instantiates a new NodeConnection. Do not forget to start the thread. All TCP/IP communication is handled by this
        connection.
         main_node: The Node class that received a connection.
         sock: The socket that is assiociated with the client connection.
@@ -53,7 +53,7 @@ class NodeConnection(threading.Thread):
     def send(self, data):
         """Send the data to the connected node. The data should be of the type string. A terminating string (-TSN) is
            used to make sure, the node is able to process the messages that are send."""
-           
+
         try:
             data = data + "-TSN"
             self.sock.sendall(data.encode('utf-8'))
@@ -76,15 +76,15 @@ class NodeConnection(threading.Thread):
     # Required to implement the Thread. This is the main loop of the node client.
     def run(self):
         """The main loop of the thread to handle the connection with the node. Within the
-           main loop the thread waits to receive data from the node. If data is received 
+           main loop the thread waits to receive data from the node. If data is received
            the method node_message will be invoked of the main node to be processed."""
-        self.sock.settimeout(10.0)          
- 
+        self.sock.settimeout(10.0)
+
         while not self.terminate_flag.is_set():
             line = ""
 
             try:
-                line = self.sock.recv(4096) 
+                line = self.sock.recv(4096)
 
             except socket.timeout:
                 self.main_node.debug_print("NodeConnection: timeout")
@@ -97,7 +97,7 @@ class NodeConnection(threading.Thread):
             if line != "":
                 try:
                     # BUG: possible buffer overflow when no -TSN is found!
-                    self.buffer += str(line.decode('utf-8')) 
+                    self.buffer += str(line.decode('utf-8'))
 
                 except Exception as e:
                     print("NodeConnection: Decoding line error | " + str(e))
