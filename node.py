@@ -10,7 +10,7 @@ from requests import get
 import data_request_management as dtrm
 
 #don't have to add a lot of peers
-peers = []
+peers = {}
 # The maximum amount of peers that can connect to the node
 maxpeers = 5
 # Currently connected peers
@@ -28,24 +28,6 @@ myip = ''
 #uncomment these two lines to get public ip from external server.
 #myip = get('https://api.ipify.org').text
 #print("Public IP: " + myip)
-
-
-saveData = {}
-
-def exportPeers():
-    saveData["peers"] = peers
-    print(saveData)
-    with open('state.json', 'w') as prev:
-        json.dump(saveData, prev)
-        prev.close()
-
-def load():
-        with open('state.json', 'rb') as prev:
-            saveData = json.load(prev)
-            print(saveData)
-            peers = saveData["peers"]
-            prev.close()
-            ConnectToNodes(len(peers))
 
 
 def ConnectToNodes(nn):
@@ -86,16 +68,20 @@ def send_peers():
     return
 
 def data_handler(data, n):
-    print("Own ip: " + myip)
     global peers
     dta = {}
     dta = json.loads(data)
+    print(dta)
     if "peers" in dta:
         #peers handling
-        new = [i for i in peers if i not in dta["peers"]]
+        new = {}
+        for i in dta["peers"]:
+            if i not in peers:
+                new = {**peers, **new}
+
+        print("Own ip: " + myip)
         if myip in new:
                 new.remove(myip) # remove your ip so it will not connect to itself
-        peers = dta["peers"] + new
         #print("new neighbours: " + str(new))
         print("peers: " + str(peers))
         ConnectToNodes(len(new)) # cpnnect to new nodes
@@ -125,6 +111,7 @@ def node_callback(event, node, other, data):
     global connected_peers
     print("connected peers: " + str(connected_peers))
     global peers
+    print(event + "\n")
     if ("disconnected" in event):
         if node.nodeip in peers:
             peers.remove(node.nodeip)
@@ -143,14 +130,13 @@ def node_callback(event, node, other, data):
         if (event=="outbound_node_connected"):
             send_peers()
         print("the node's address is: " + str(node.nodeip))
-        if node.nodeip not in peers:
-            peers.append(node.nodeip)
-        print(event + "\n")
+        if node.id not in peers:
+            peers[node.id](node.nodeip)
         connected_peers = connected_peers +1
     elif ( event == "node_message" ):
         data_handler(data, [other, node])
     else:
-        print(event + "\n")
+        print(event)
 
     print(peers)
 
@@ -165,13 +151,14 @@ while True:
         node.connect_with_node(args, PORT)
 
     if cmd == "stop":
-        exportPeers()
         node.stop()
 
     if cmd == "exit":
-        exportPeers()
         node.stop()
         exit(0)
+
+    if cmd == "peers":
+        print(peers)
 
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
@@ -179,12 +166,6 @@ while True:
         message({'msg': args})
 
     if "req " in cmd:
-        args = cmd.replace("request ", "")
+        args = cmd.replace("req ", "")
         print("requesting file with hash: " + args)
         message({'req': args})
-
-    if cmd == "save":
-        exportPeers()
-
-    if cmd == "load":
-        load()
