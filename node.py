@@ -71,7 +71,6 @@ def data_handler(data, n):
     global peers
     dta = {}
     dta = json.loads(data)
-    print(dta)
     if "peers" in dta:
         #peers handling
         new = {}
@@ -131,7 +130,7 @@ def node_callback(event, node, other, data):
             send_peers()
         print("the node's address is: " + str(node.nodeip))
         if node.id not in peers:
-            peers[node.id](node.nodeip)
+            peers[node.id] = (node.nodeip)
         connected_peers = connected_peers +1
     elif ( event == "node_message" ):
         data_handler(data, [other, node])
