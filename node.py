@@ -140,7 +140,6 @@ def node_callback(event, node, other, data):
     print(peers)
 
 node = Node("", PORT, node_callback) # start the node
-node.start()
 
 while True:
     cmd = input(">")

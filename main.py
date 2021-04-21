@@ -1,3 +1,7 @@
+import os
+
+os.system("cls")
+
 print(str("""
            ---Python p2p node by GTsol---
     Please make sure the latest version is installed
@@ -17,9 +21,13 @@ print(str("""
 
     """))
 
+
 from node import *
 from p2pnetwork.node import Node
 import time
 
-#load previous variables
-load()
+try:
+    node.start()
+except KeyboardInterrupt:
+    node.stop()
+    exit(0)
