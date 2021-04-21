@@ -9,6 +9,7 @@ import sys
 from requests import get
 import data_request_management as dtrm
 
+debug_mode = False
 #don't have to add a lot of peers
 peers = {}
 # The maximum amount of peers that can connect to the node
@@ -29,6 +30,12 @@ myip = ''
 #myip = get('https://api.ipify.org').text
 #print("Public IP: " + myip)
 
+def debug(out):
+    if debug_mode == True:
+        print("\033[93m [debug] " + str(out) + " \033[0m")
+
+def response(out):
+        print("\033[92m" + str(out) + " \033[0m")
 
 def ConnectToNodes(nn):
     global connected_peers
@@ -37,12 +44,12 @@ def ConnectToNodes(nn):
     if connected_peers+nn>maxpeers:
         nn = maxpeers-connected_peers
     if connected_peers >= maxpeers:
-        print("FUCK FUCK FUCK, too much peers, how did this happen?? fuck")
+        debug("FUCK FUCK FUCK, too much peers, how did this happen?? fuck")
         return
     if nn > len(peers):
         nn = len(peers)
     for i in range(nn):
-        print('connecting with {}'.format(peers[i]))
+        debug('connecting with {}'.format(peers[i]))
         node.connect_with_node(peers[i], PORT)
     return
 
@@ -78,11 +85,11 @@ def data_handler(data, n):
             if i not in peers:
                 new = {**peers, **new}
 
-        print("Own ip: " + myip)
+        debug("Own ip: " + myip)
         if myip in new:
                 new.remove(myip) # remove your ip so it will not connect to itself
         #print("new neighbours: " + str(new))
-        print("peers: " + str(peers))
+        debug("peers: " + str(peers))
         ConnectToNodes(len(new)) # cpnnect to new nodes
         return
     elif "msg" in dta:
@@ -93,18 +100,18 @@ def data_handler(data, n):
             message(dta, ex=n)
         else:
             #if message is expired
-            print("expired:" + dta['msg'])
+            debug("expired:" + dta['msg'])
         return
     elif "req" in dta:
         if dtrm.have_file(dta['req']):
             message({"resp": hash})
 
         else:
-            print("recieved request for file: " + dta['req'] + " but we do not have it.")
+            debug("recieved request for file: " + dta['req'] + " but we do not have it.")
 
     elif "resp" in dta:
-        print("node: " + dta['snid']+"has file " + dta['resp'])
-        print("Downloading files will be added in another version")
+        debug("node: " + dta['snid']+"has file " + dta['resp'])
+        debug("Downloading files will be added in another version (probably never lol the dev sucks)")
 
 def node_callback(event, node, other, data):
     global connected_peers
@@ -145,25 +152,29 @@ while True:
     cmd = input(">")
     if "connect " in cmd:
         args = cmd.replace("connect ", "")
-        print("connect to: " + args)
+        response("connect to: " + args)
         node.connect_with_node(args, PORT)
 
     if cmd == "stop":
         node.stop()
+
+    if cmd == "debug":
+        debug_mode = not debug_mode
+        response("Debug is now " + str(debug_mode))
 
     if cmd == "exit":
         node.stop()
         exit(0)
 
     if cmd == "peers":
-        print(peers)
+        response(peers)
 
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
-        print("message: " + args)
+        response("message: " + args)
         message({'msg': args})
 
     if "req " in cmd:
         args = cmd.replace("req ", "")
-        print("requesting file with hash: " + args)
+        response("requesting file with hash: " + args)
         message({'req': args})
