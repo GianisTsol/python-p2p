@@ -1,5 +1,0 @@
-- Implement data requesting between nodes - PARTIALY DONE
-
-- Implement better message system i.e. {msg, sender, recipient, time} - DONE! (recipient atribute will be added with the data requesting feature)
-
--Simplify interface & add debug ouptut + output colors

@@ -1,180 +1,151 @@
-#simple python peer to peer network using the p2pnetwork module. It uses a simple model for information exchange between peers.
-# Author: Giannis Tsolakis
-# no liscence do whatever you want
-
-from p2pnetwork.node import Node
-import time
+import threading
+import uuid
+import socket
+from connection import *
 import json
-import sys
-from requests import get
-import data_request_management as dtrm
 
-debug_mode = False
-#don't have to add a lot of peers
-peers = {}
-# The maximum amount of peers that can connect to the node
-maxpeers = 5
-# Currently connected peers
-connected_peers = 0
-#time to wait until a message will stop being forwarded - in seconds
-msg_del_time = 30
-# The port that the server will run on.
-#To form a single network, please, do not change this
-PORT = 65432
+class Node(threading.Thread):
+    def __init__(self, host, port, callback=None):
 
-###########################################################
+        self.terminate_flag = threading.Event()
 
-#your ip that others connect to
-myip = ''
-#uncomment these two lines to get public ip from external server.
-#myip = get('https://api.ipify.org').text
-#print("Public IP: " + myip)
+        self.pinger = Pinger(self) # start pinger
 
-def debug(out):
-    if debug_mode == True:
-        print("\033[93m [debug] " + str(out) + " \033[0m")
+        super(Node, self).__init__() #CAll Thread.__init__()
 
-def response(out):
-        print("\033[92m" + str(out) + " \033[0m")
+        self.callback = callback
 
-def ConnectToNodes(nn):
-    global connected_peers
-    global peers
-    global maxpeers
-    if connected_peers+nn>maxpeers:
-        nn = maxpeers-connected_peers
-    if connected_peers >= maxpeers:
-        debug("FUCK FUCK FUCK, too much peers, how did this happen?? fuck")
-        return
-    if nn > len(peers):
-        nn = len(peers)
-    for i in range(nn):
-        debug('connecting with {}'.format(peers[i]))
-        node.connect_with_node(peers[i], PORT)
-    return
+        self.debug = True
 
-def message(dicts, ex=[]):
-    dict = {}
-    dict = dicts
-    #time that the message was sent
-    dict['time'] = str(time.time())
-    #sender node id
-    if node != None:
-        dict['snid'] = str(node.id)
-    buf = json.dumps(dict)
-    if node != None:
-        node.send_to_nodes(buf, ex)
+        self.dead_time = 30 #time to disconect from node if not pinged
 
-def req_file(hash):
-    message({'req': hash})
+        self.host = host
+        self.ip = host #own ip, will be changed by connection later
+        self.port = port
 
-def send_peers():
-    global peers
-    buf = {'peers': peers}
-    message(buf)
-    return
+        self.nodes_connected = []
 
-def data_handler(data, n):
-    global peers
-    dta = {}
-    dta = json.loads(data)
-    if "peers" in dta:
-        #peers handling
-        new = {}
-        for i in dta["peers"]:
-            if i not in peers:
-                new = {**peers, **new}
+        self.id = str(uuid.uuid4())
 
-        debug("Own ip: " + myip)
-        if myip in new:
-                new.remove(myip) # remove your ip so it will not connect to itself
-        #print("new neighbours: " + str(new))
-        debug("peers: " + str(peers))
-        ConnectToNodes(len(new)) # cpnnect to new nodes
-        return
-    elif "msg" in dta:
-        #handle message data.
-        print(time.ctime() + " msg: " + dta["msg"])
-        #check if the message hasn't expired.
-        if float(time.time()) - float(dta['time']) < float(msg_del_time):
-            message(dta, ex=n)
-        else:
-            #if message is expired
-            debug("expired:" + dta['msg'])
-        return
-    elif "req" in dta:
-        if dtrm.have_file(dta['req']):
-            message({"resp": hash})
+        self.max_peers = 10
 
-        else:
-            debug("recieved request for file: " + dta['req'] + " but we do not have it.")
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print("Initialisation of the Node on port: " + str(self.port) + " on node (" + self.id + ")")
+        self.sock.bind((self.host, self.port))
+        self.sock.settimeout(10.0)
+        self.sock.listen(1)
 
-    elif "resp" in dta:
-        debug("node: " + dta['snid']+"has file " + dta['resp'])
-        debug("Downloading files will be added in another version (probably never lol the dev sucks)")
+    def debug_print(self, msg):
+        if self.debug:
+            print("[debug] " + str(msg))
 
-def node_callback(event, node, other, data):
-    global connected_peers
-    print("connected peers: " + str(connected_peers))
-    global peers
-    print(event + "\n")
-    if ("disconnected" in event):
-        if node.nodeip in peers:
-            peers.remove(node.nodeip)
-        print(event + "\n")
-        connected_peers = connected_peers -1
-    elif ("connected" in event):
-        if other.id == node.id:
-            myip = node.nodeip
-            print("connected to ourselves, ip: " + node.nodeip)
-            if node.nodeip in peers:
-                peers.remove(node.nodeip)
-            node.disconnect_with_node(other)
-        if (event=="inbound_node_connected"):
-            send_peers()
 
-        if (event=="outbound_node_connected"):
-            send_peers()
-        print("the node's address is: " + str(node.nodeip))
-        if node.id not in peers:
-            peers[node.id] = (node.nodeip)
-        connected_peers = connected_peers +1
-    elif ( event == "node_message" ):
-        data_handler(data, [other, node])
-    else:
-        print(event)
+    def network_send(self, message):
+        for i in self.nodes_connected:
+            i.send(json.dumps(message))
 
-    print(peers)
+    def connect_to(self, host, port):
 
-node = Node("", PORT, node_callback) # start the node
+        if host == self.ip:
+            debug_print("connect_to: Cannot connect with yourself!!")
+            return False
 
-while True:
-    cmd = input(">")
-    if "connect " in cmd:
-        args = cmd.replace("connect ", "")
-        response("connect to: " + args)
-        node.connect_with_node(args, PORT)
+        if len(nodes_connected) >= max_peers:
+            debug_print("Peers limit reached.")
+            return True
 
-    if cmd == "stop":
-        node.stop()
+        for node in self.nodes_connected:
+            if node.host == host:
+                print("[connect_to]: Already connected with this node.")
+                return True
 
-    if cmd == "debug":
-        debug_mode = not debug_mode
-        response("Debug is now " + str(debug_mode))
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.debug_print("connecting to %s port %s" % (host, port))
+            sock.connect((host, port))
 
-    if cmd == "exit":
-        node.stop()
-        exit(0)
+            # Basic information exchange (not secure) of the id's of the nodes!
+            sock.send(self.id.encode('utf-8')) # Send my id to the connected node!
+            connected_node_id = str(sock.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
 
-    if cmd == "peers":
-        response(peers)
+            thread_client = self.create_new_connection(sock, connected_node_id, host, port)
+            thread_client.start()
 
-    if "msg " in cmd:
-        args = cmd.replace("msg ", "")
-        response("message: " + args)
-        message({'msg': args})
+            self.nodes_connected.append(thread_client)
+            self.node_connected(thread_client)
 
-    if "req " in cmd:
-        args = cmd.replace("req ", "")
-        response("requesting file with hash: " + args)
-        message({'req': args})
+
+        except Exception as e:
+            self.debug_print("connect_to: Could not connect with node. (" + str(e) + ")")
+
+    def create_new_connection(self, connection, id, host, port):
+        return NodeConnection(self, connection, id, host, port)
+
+    def stop(self):
+        self.terminate_flag.set()
+
+    def run(self):
+        self.pinger.start()
+        while not self.terminate_flag.is_set():  # Check whether the thread needs to be closed
+            try:
+                connection, client_address = self.sock.accept()
+
+                # Basic information exchange (not secure) of the id's of the nodes!
+                connected_node_id = str(connection.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
+                connection.send(self.id.encode('utf-8')) # Send my id to the connected node!
+
+                thread_client = self.create_new_connection(connection, connected_node_id, client_address[0], client_address[1])
+                thread_client.start()
+
+                self.nodes_connected.append(thread_client)
+
+                self.node_connected(thread_client)
+
+            except socket.timeout:
+                pass
+
+            except Exception as e:
+                raise e
+
+            time.sleep(0.01)
+
+        self.pinger.stop()
+        for t in self.nodes_connected:
+            t.stop()
+
+        time.sleep(1)
+        self.pinger.join()
+        for t in self.nodes_connected:
+            t.join()
+
+        self.sock.close()
+        print("Node stopped")
+
+    def node_connected(self, node):
+        self.debug_print("node_connected: " + node.id)
+        if self.callback is not None:
+            self.callback("node_connected", self, node, {})
+
+
+    def node_message(self, node, data):
+        self.debug_print("node_message: " + node.id + ": " + str(json.loads(data)))
+        if self.callback is not None:
+            self.callback("node_message", self, node, json.loads(data))
+
+class Pinger(threading.Thread):
+    def __init__(self, parent):
+        self.terminate_flag = threading.Event()
+        super(Pinger, self).__init__() #CAll Thread.__init__()
+        self.parent = parent
+        self.dead_time = 30 #time to disconect from node if not pinged
+
+    def stop(self):
+        self.terminate_flag.set()
+
+    def run(self):
+        while not self.terminate_flag.is_set():  # Check whether the thread needs to be closed
+            for i in self.parent.nodes_connected:
+                i.send('ping')
+                time.sleep(20)
+        print("Pinger stopped")
