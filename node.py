@@ -41,9 +41,12 @@ class Node(threading.Thread):
             print("[debug] " + str(msg))
 
 
-    def network_send(self, message):
+    def network_send(self, message, except=[]):
         for i in self.nodes_connected:
-            i.send(json.dumps(message))
+            if i.host in except:
+                pass
+            else:
+                i.send(json.dumps(message))
 
     def connect_to(self, host, port):
 
