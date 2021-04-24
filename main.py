@@ -69,7 +69,7 @@ def data_handler(data, n):
         debugp("Downloading files will be added in another version (probably never lol the dev sucks)")
 
     else:
-        deugp("Recieved an unknown or corrupt message")
+        debugp("Recieved an unknown or corrupt message")
 
 def node_callback(event, node, other, data):
     global peers
