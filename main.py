@@ -16,7 +16,7 @@ def debugp(out):
 
 def ConnectToNodes():
     for i in peers:
-        node.connect_to(i)
+        node.connect_to(i, PORT)
 
 def message(dicts, ex=[]):
     dict = {}
