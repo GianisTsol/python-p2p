@@ -15,7 +15,7 @@ class Node(threading.Thread):
 
         self.callback = callback
 
-        self.debug = True
+        self.debug = False
 
         self.dead_time = 30 #time to disconect from node if not pinged
 

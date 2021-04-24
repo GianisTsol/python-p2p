@@ -26,7 +26,6 @@ def message(dicts, ex=[]):
     #sender node id
     if node != None:
         dict['snid'] = str(node.id)
-    buf = json.dumps(dict)
     if node != None:
         node.network_send(buf, ex)
 
@@ -41,8 +40,7 @@ def send_peers():
 
 def data_handler(data, n):
     global peers
-    dta = {}
-    dta = json.loads(data)
+    dta = data
     if "peers" in dta:
         #peers handling
         for i in dta["peers"]:
