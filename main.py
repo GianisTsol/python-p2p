@@ -18,16 +18,13 @@ def ConnectToNodes():
     for i in peers:
         node.connect_to(i, PORT)
 
-def message(dicts, ex=[]):
-    dict = {}
-    dict = dicts
+def message(dict, ex=[]):
     #time that the message was sent
     dict['time'] = str(time.time())
     #sender node id
-    if node != None:
-        dict['snid'] = str(node.id)
-    if node != None:
-        node.network_send(buf, ex)
+    dict['snid'] = str(node.id)
+
+    node.network_send(dict, ex)
 
 def req_file(hash):
     message({'req': hash})
@@ -50,7 +47,7 @@ def data_handler(data, n):
         debugp("Known Peers: " + str(peers))
         ConnectToNodes() # cpnnect to new nodes
         return
-    elif "msg" in dta:
+    elif "msg" in dta and "time" in dta:
         #handle message data.
         debugp("Incomig Message: " + dta["msg"])
         #check if the message hasn't expired.
@@ -67,9 +64,12 @@ def data_handler(data, n):
         else:
             debugp("recieved request for file: " + dta['req'] + " but we do not have it.")
 
-    elif "resp" in dta:
+    elif "resp" in dta and "snid" in dta:
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         debugp("Downloading files will be added in another version (probably never lol the dev sucks)")
+
+    else:
+        deugp("Recieved an unknown or corrupt message")
 
 def node_callback(event, node, other, data):
     global peers
