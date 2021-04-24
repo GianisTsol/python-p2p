@@ -50,11 +50,11 @@ def data_handler(data, n):
             if i not in peers:
                 new = {**peers, **new}
 
-        debugp("Own ip: " + myip)
+        debugp("Own ip: " + myip + " <-- If this is empty we ave a problem.")
         if myip in new:
                 new.remove(myip) # remove your ip so it will not connect to itself
         #print("new neighbours: " + str(new))
-        debugp("peers: " + str(peers))
+        debugp("Known Peers: " + str(peers))
         ConnectToNodes() # cpnnect to new nodes
         return
     elif "msg" in dta:
