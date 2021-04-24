@@ -51,11 +51,11 @@ class Node(threading.Thread):
     def connect_to(self, host, port):
 
         if host == self.ip:
-            debug_print("connect_to: Cannot connect with yourself!!")
+            self.debug_print("connect_to: Cannot connect with yourself!!")
             return False
 
         if len(self.nodes_connected) >= self.max_peers:
-            debug_print("Peers limit reached.")
+            self.debug_print("Peers limit reached.")
             return True
 
         for node in self.nodes_connected:
