@@ -12,10 +12,7 @@ PORT = 65432
 
 def debugp(out):
     if node.debug_mode == True:
-        print("\033[93m [debug] " + str(out) + " \033[0m")
-
-def response(out):
-        print("\033[92m" + str(out) + " \033[0m")
+        print("[debug] " + str(out))
 
 def ConnectToNodes():
     for i in peers:
@@ -58,7 +55,7 @@ def data_handler(data, n):
                 new.remove(myip) # remove your ip so it will not connect to itself
         #print("new neighbours: " + str(new))
         debugp("peers: " + str(peers))
-        ConnectToNodes(len(new)) # cpnnect to new nodes
+        ConnectToNodes() # cpnnect to new nodes
         return
     elif "msg" in dta:
         #handle message data.
@@ -121,17 +118,17 @@ while True:
     cmd = input(">")
     if "connect " in cmd:
         args = cmd.replace("connect ", "")
-        response("connect to: " + args)
+        print("connect to: " + args)
         node.connect_to(args, PORT)
 
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
-        response("sent msg: " + args)
+        print("sent msg: " + args)
         node.network_send({"msg": args})
 
     if cmd == "debug":
         node.debug = not node.debug
-        response("Debug is now " + str(node.debug))
+        print("Debug is now " + str(node.debug))
 
     if cmd == "stop":
         node.stop()
@@ -142,14 +139,18 @@ while True:
         exit(0)
 
     if cmd == "peers":
-        response(peers)
+        buf='--------------\n'
+        for i in node.nodes_connected: buf = buf+'\n'+i.id+' -|- '+i.host
+        if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
+        buf = buf + '--------------'
+        print(buf)
 
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
-        response("message: " + args)
+        print("message: " + args)
         message({'msg': args})
 
     if "req " in cmd:
         args = cmd.replace("req ", "")
-        response("requesting file with hash: " + args)
+        print("requesting file with hash: " + args)
         message({'req': args})
