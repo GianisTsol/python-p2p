@@ -54,7 +54,7 @@ class Node(threading.Thread):
             debug_print("connect_to: Cannot connect with yourself!!")
             return False
 
-        if len(nodes_connected) >= max_peers:
+        if len(self.nodes_connected) >= self.max_peers:
             debug_print("Peers limit reached.")
             return True
 

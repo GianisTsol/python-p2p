@@ -45,15 +45,10 @@ def data_handler(data, n):
     dta = json.loads(data)
     if "peers" in dta:
         #peers handling
-        new = {}
         for i in dta["peers"]:
             if i not in peers:
-                new = {**peers, **new}
+                peers.append(i)
 
-        debugp("Own ip: " + myip + " <-- If this is empty we ave a problem.")
-        if myip in new:
-                new.remove(myip) # remove your ip so it will not connect to itself
-        #print("new neighbours: " + str(new))
         debugp("Known Peers: " + str(peers))
         ConnectToNodes() # cpnnect to new nodes
         return
@@ -79,37 +74,23 @@ def data_handler(data, n):
         debugp("Downloading files will be added in another version (probably never lol the dev sucks)")
 
 def node_callback(event, node, other, data):
-    global connected_peers
-    print("connected peers: " + str(connected_peers))
     global peers
-    print(event + "\n")
     if ("disconnected" in event):
         if node.nodeip in peers:
             peers.remove(node.nodeip)
         print(event + "\n")
-        connected_peers = connected_peers -1
-    elif ("connected" in event):
-        if other.id == node.id:
-            myip = node.nodeip
-            print("connected to ourselves, ip: " + node.nodeip)
-            if node.nodeip in peers:
-                peers.remove(node.nodeip)
-            node.disconnect_with_node(other)
-        if (event=="inbound_node_connected"):
-            send_peers()
 
-        if (event=="outbound_node_connected"):
-            send_peers()
-        print("the node's address is: " + str(node.nodeip))
-        if node.id not in peers:
-            peers[node.id] = (node.nodeip)
-        connected_peers = connected_peers +1
+    elif (event=="node_connected"):
+        if node.nodeip not in peers:
+            peers.append(node.nodeip)
+        send_peers()
+
     elif ( event == "node_message" ):
-        data_handler(data, [other, node])
+        data_handler(data, [other.host, node.ip])
+
     else:
         print(event)
 
-    print(peers)
 
 node = Node("", PORT, node_callback) # start the node
 node.start()
