@@ -11,7 +11,7 @@ msg_del_time = 30
 PORT = 65432
 
 def debugp(out):
-    if node.debug_mode == True:
+    if node.debug == True:
         print("[debug] " + str(out))
 
 def ConnectToNodes():
