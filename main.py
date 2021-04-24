@@ -120,7 +120,7 @@ while True:
 
     if cmd == "peers":
         buf='--------------\n'
-        for i in node.nodes_connected: buf = buf+'\n'+i.id+' -|- '+i.host
+        for i in node.nodes_connected: buf = buf+'\n'+i.id+' ('+ i.host + ') - ' + str(time.time() - i.last_ping) + "s"
         if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
         buf = buf + '\n--------------'
         print(buf)
