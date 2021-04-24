@@ -91,8 +91,9 @@ class NodeConnection(threading.Thread):
 
             time.sleep(0.01)
 
-
+        self.main_node.node_disconnected[self]
         self.sock.settimeout(None)
         self.sock.close()
         self.main_node.debug_print("NodeConnection: Stopped")
         del self.main_node.nodes_connected[self.main_node.nodes_connected.index(self)]
+        time.sleep(1)

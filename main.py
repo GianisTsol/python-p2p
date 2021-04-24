@@ -54,7 +54,7 @@ def data_handler(data, n):
         return
     elif "msg" in dta:
         #handle message data.
-        print(time.ctime() + " msg: " + dta["msg"])
+        debugp("Incomig Message: " + dta["msg"])
         #check if the message hasn't expired.
         if float(time.time()) - float(dta['time']) < float(msg_del_time):
             message(dta, ex=n)
@@ -70,22 +70,21 @@ def data_handler(data, n):
             debugp("recieved request for file: " + dta['req'] + " but we do not have it.")
 
     elif "resp" in dta:
-        debug("node: " + dta['snid']+"has file " + dta['resp'])
+        debugp("node: " + dta['snid']+" has file " + dta['resp'])
         debugp("Downloading files will be added in another version (probably never lol the dev sucks)")
 
 def node_callback(event, node, other, data):
     global peers
-    if ("disconnected" in event):
-        if node.nodeip in peers:
-            peers.remove(node.nodeip)
-        print(event + "\n")
+    if event == "node_disconnected":
+        if other.host in peers:
+            peers.remove(other.host)
 
-    elif (event=="node_connected"):
-        if node.nodeip not in peers:
-            peers.append(node.nodeip)
+    elif event == "node_connected":
+        if other.host not in peers:
+            peers.append(node.host)
         send_peers()
 
-    elif ( event == "node_message" ):
+    elif event == "node_message":
         data_handler(data, [other.host, node.ip])
 
     else:

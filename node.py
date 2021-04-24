@@ -130,6 +130,11 @@ class Node(threading.Thread):
         if self.callback is not None:
             self.callback("node_connected", self, node, {})
 
+    def node_disconnected(self, node):
+        self.debug_print("node_disconnected: " + node.id)
+        if self.callback is not None:
+            self.callback("node_disconnected", self, node, {})
+
 
     def node_message(self, node, data):
         self.debug_print("node_message: " + node.id + ": " + str(json.loads(data)))
