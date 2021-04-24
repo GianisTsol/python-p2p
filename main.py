@@ -122,7 +122,7 @@ while True:
         buf='--------------\n'
         for i in node.nodes_connected: buf = buf+'\n'+i.id+' -|- '+i.host
         if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
-        buf = buf + '--------------'
+        buf = buf + '\n--------------'
         print(buf)
 
     if "msg " in cmd:
