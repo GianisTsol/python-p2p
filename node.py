@@ -41,9 +41,9 @@ class Node(threading.Thread):
             print("[debug] " + str(msg))
 
 
-    def network_send(self, message, except=[]):
+    def network_send(self, message, exc=[]):
         for i in self.nodes_connected:
-            if i.host in except:
+            if i.host in exc:
                 pass
             else:
                 i.send(json.dumps(message))
