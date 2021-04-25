@@ -24,6 +24,7 @@ def message(dict, ex=[]):
     #sender node id
     dict['snid'] = str(node.id)
 
+    print("magsgg: " + str(dict))
     node.network_send(dict, ex)
 
 def req_file(hash):
@@ -122,11 +123,6 @@ while True:
         if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
         buf = buf + '\n--------------'
         print(buf)
-
-    if "msg " in cmd:
-        args = cmd.replace("msg ", "")
-        print("message: " + args)
-        message({'msg': args})
 
     if "req " in cmd:
         args = cmd.replace("req ", "")

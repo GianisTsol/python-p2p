@@ -68,9 +68,9 @@ class Node(threading.Thread):
             self.debug_print("connecting to %s port %s" % (host, port))
             sock.connect((host, port))
 
-            # Basic information exchange (not secure) of the id's of the nodes!
-            sock.send(self.id.encode('utf-8')) # Send my id to the connected node!
-            connected_node_id = str(sock.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
+
+            sock.send(self.id.encode('utf-8'))
+            connected_node_id = str(sock.recv(4096).decode('utf-8'))
 
             thread_client = self.create_new_connection(sock, connected_node_id, host, port)
             thread_client.start()
