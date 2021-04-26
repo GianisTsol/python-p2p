@@ -74,7 +74,7 @@ def data_handler(data, n):
         if dta['resp'] in requested:
             downloader = FileDownloader(serverip, self.file_port, hash)
             downloader.start()
-    
+
     else:
         debugp("Recieved an unknown or corrupt message type.")
 
@@ -125,6 +125,9 @@ while True:
     if cmd == "exit":
         node.stop()
         exit(0)
+
+    if cmd == "refresh":
+        dtrm.refresh()
 
     if cmd == "peers":
         buf='--------------\n'

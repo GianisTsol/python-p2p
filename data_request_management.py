@@ -21,6 +21,7 @@ f = []
 def refresh():
     for (dirpath, dirnames, filenames) in walk(mypath):
         f.extend(filenames)
+        print(filenames)
         filenamess = filenames
         break
 
@@ -28,6 +29,7 @@ f2data= {}
 
 with open('resources.json', 'w') as f2:
     for file in filenamess:
+        f2data.append(hashFile(file))
         f2data[hashFile(file)] = file
         json.dump(f2data, f2)
 

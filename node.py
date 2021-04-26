@@ -158,6 +158,7 @@ class Pinger(threading.Thread):
         self.terminate_flag.set()
 
     def run(self):
+        print("Pinger Started")
         while not self.terminate_flag.is_set():  # Check whether the thread needs to be closed
             for i in self.parent.nodes_connected:
                 i.send('ping')
