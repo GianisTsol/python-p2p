@@ -85,12 +85,12 @@ class fileServer(threading.Thread):
 class FileDownloader(threading.Thread):
     def __init__(self, ip, port, hash):
         super(FileDownloader, self).__init__()
-        self.work = False
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(ip)
         self.conn.connect((ip, port))
+        print("File Downloder Started")
 
     def run(self):
-        print("File Downloder Started")
         self.conn.send(hash.encode('utf-8'))
         self.data_size = struct.unpack('>I', conn.recv(4))[0]
         filename = str(conn.recv(4096).decode('utf-8')) #recieve file name

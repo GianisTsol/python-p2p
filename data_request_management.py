@@ -8,13 +8,12 @@ mypath = "content/"
 
 def hashFile(filepath):
     filepath = mypath + filepath
-    BLOCKSIZE = 65536
     hasher = hashlib.md5()
     with open(filepath, 'rb') as afile:
-        buf = afile.read(BLOCKSIZE)
+        buf = afile.read()
         while len(buf) > 0:
             hasher.update(buf)
-            buf = afile.read(BLOCKSIZE)
+            buf = afile.read()
     return(hasher.hexdigest())
 
 f = []

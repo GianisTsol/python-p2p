@@ -18,7 +18,7 @@ class Node(threading.Thread):
 
         self.callback = callback
 
-        self.debug = False
+        self.debug = True
 
         self.dead_time = 30 #time to disconect from node if not pinged
 
@@ -75,6 +75,10 @@ class Node(threading.Thread):
             sock.send(self.id.encode('utf-8'))
             connected_node_id = str(sock.recv(4096).decode('utf-8'))
 
+            if self.id == connected_node_id:
+                debug_print("own ip: " + host)
+                self.ip = host #set our own ip - this canbug if two nodes have the same id
+                return
             thread_client = self.create_new_connection(sock, connected_node_id, host, port)
             thread_client.start()
 

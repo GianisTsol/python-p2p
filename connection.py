@@ -24,10 +24,6 @@ class NodeConnection(threading.Thread):
         # The id of the connected node
         self.id = id
 
-        if self.id == self.main_node.id:
-            self.main_node.ip = self.host #set our own ip - this canbug if two nodes have the same id
-            self.terminate_flag.set()
-
         self.main_node.debug_print("NodeConnection.send: Started with client (" + self.id + ") '" + self.host + ":" + str(self.port) + "'")
 
     def send(self, data):
@@ -83,7 +79,7 @@ class NodeConnection(threading.Thread):
 
                     if message == "ping":
                         self.last_ping = time.time()
-                        self.main_node.debug_print("ping from " + self.id)
+                        #self.main_node.debug_print("ping from " + self.id)
                     else:
                         self.main_node.node_message(self, message)
 

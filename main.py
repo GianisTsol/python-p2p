@@ -21,7 +21,8 @@ def debugp(out):
 
 def ConnectToNodes():
     for i in peers:
-        node.connect_to(i, PORT)
+        if i != "":
+            node.connect_to(i, PORT)
 
 def message(dict, ex=[]):
     #time that the message was sent
@@ -46,7 +47,7 @@ def data_handler(data, n):
     if "peers" in dta:
         #peers handling
         for i in dta["peers"]:
-            if i not in peers:
+            if i not in peers and i != "":
                 peers.append(i)
 
         debugp("Known Peers: " + str(peers))
@@ -85,8 +86,9 @@ def node_callback(event, node, other, data):
             peers.remove(other.host)
 
     elif event == "node_connected":
+        print(other.host)
         if other.host not in peers:
-            peers.append(node.host)
+            peers.append(other.host)
         send_peers()
 
     elif event == "node_message":
@@ -133,6 +135,8 @@ while True:
         dtrm.refresh()
 
     if cmd == "peers":
+        print("IP: " + node.ip)
+        debugp(peers)
         buf='--------------\n'
         for i in node.nodes_connected: buf = buf+'\n'+i.id+' ('+ i.host + ') - ' + str(time.time() - i.last_ping) + "s"
         if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
