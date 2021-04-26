@@ -9,6 +9,7 @@ peers = []
 msg_del_time = 30
 
 PORT = 65432
+FILE_PORT = 65433
 
 def debugp(out):
     if node.debug == True:
@@ -24,7 +25,6 @@ def message(dict, ex=[]):
     #sender node id
     dict['snid'] = str(node.id)
 
-    print("magsgg: " + str(dict))
     node.network_send(dict, ex)
 
 def req_file(hash):
@@ -90,7 +90,7 @@ def node_callback(event, node, other, data):
         print(event)
 
 
-node = Node("", PORT, node_callback) # start the node
+node = Node("", PORT, FILE_PORT, node_callback) # start the node
 node.start()
 
 while True:

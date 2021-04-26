@@ -23,15 +23,11 @@ for (dirpath, dirnames, filenames) in walk(mypath):
     break
 
 f2data= {}
-f2data['data'] = []
+
 with open('resources.json', 'w') as f2:
     for file in filenames:
-        f2data['data'].append({
-            'filename': file,
-            'hash': hashFile(file)
-        })
+        f2data[hashFile(file)] = mypath + file
         json.dump(f2data, f2)
-        f2data['data'] = []
 
 def have_file(hash):
     if hash in f2data:

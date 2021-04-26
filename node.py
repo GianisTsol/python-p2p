@@ -2,14 +2,17 @@ import threading
 import uuid
 import socket
 from connection import *
+from file_transfer import fileServer
 import json
+import pickle
 
 class Node(threading.Thread):
-    def __init__(self, host, port, callback=None):
+    def __init__(self, host, port, file_port, callback=None):
 
         self.terminate_flag = threading.Event()
 
         self.pinger = Pinger(self) # start pinger
+        self.fileServer = fileServer(self, file_port)
 
         super(Node, self).__init__() #CAll Thread.__init__()
 
@@ -90,6 +93,7 @@ class Node(threading.Thread):
 
     def run(self):
         self.pinger.start()
+        self.fileServer.start()
         while not self.terminate_flag.is_set():  # Check whether the thread needs to be closed
             try:
                 connection, client_address = self.sock.accept()
@@ -114,11 +118,13 @@ class Node(threading.Thread):
             time.sleep(0.01)
 
         self.pinger.stop()
+        self.fileServer.stop()
         for t in self.nodes_connected:
             t.stop()
 
-        time.sleep(1)
+        time.sleep(0.5)
         self.pinger.join()
+        self.fileServer.join()
         for t in self.nodes_connected:
             t.join()
 
