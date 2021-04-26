@@ -5,11 +5,20 @@ from connection import *
 from file_transfer import fileServer
 import json
 import pickle
+import miniupnpc
+
 
 class Node(threading.Thread):
     def __init__(self, host, port, file_port, callback=None):
 
         self.terminate_flag = threading.Event()
+
+        upnp = miniupnpc.UPnP()
+        upnp.discoverdelay = 10
+        upnp.discover()
+        upnp.selectigd()
+        # addportmapping(external-port, protocol, internal-host, internal-port, description, remote-host)
+        upnp.addportmapping(port, 'TCP', upnp.lanaddr, port, 'PYTHON-P2P-NODE', '')
 
         self.pinger = Pinger(self) # start pinger
         self.fileServer = fileServer(self, file_port)

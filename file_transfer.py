@@ -5,6 +5,7 @@ import data_request_management as dtrm
 import time
 import struct
 import json
+import miniupnpc
 
 class fileClientThread(threading.Thread):
     def __init__(self, ip, port, conn, file_requested):
@@ -47,6 +48,14 @@ class fileServer(threading.Thread):
 
         self.parent = parent
         self.port = PORT
+
+        upnp = miniupnpc.UPnP()
+        upnp.discoverdelay = 10
+        upnp.discover()
+        upnp.selectigd()
+        # addportmapping(external-port, protocol, internal-host, internal-port, description, remote-host)
+        upnp.addportmapping(self.port, 'TCP', upnp.lanaddr, port, 'PYTHON-P2P-FILESERVER', '')
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.settimeout(10.0)
