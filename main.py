@@ -64,15 +64,15 @@ def data_handler(data, n):
         return
     elif "req" in dta:
         if dtrm.have_file(dta['req']):
-            message({"resp": dta['req']})
+            message({"resp": dta['req'], "ip": node.ip})
         else:
             debugp("recieved request for file: " + dta['req'] + " but we do not have it.")
 
-    elif "resp" in dta and "snid" in dta:
+    elif "resp" in dta and "snid" in dta and "ip" in dta:
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         if dta['resp'] in requested:
             print("node " + dta['snid'] + " has our file!")
-            downloader = FileDownloader(serverip, self.file_port, hash)
+            downloader = FileDownloader(dta['ip'], self.file_port, hash)
             downloader.start()
 
     else:
