@@ -4,6 +4,7 @@ import json
 import sys
 import data_request_management as dtrm
 from file_transfer import FileDownloader
+import portforwardlib
 
 peers = []
 
@@ -13,6 +14,19 @@ PORT = 65432
 FILE_PORT = 65433
 
 requested = [] # list of files we have requested.
+
+
+result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-NODE", False)
+if not result:
+    print("Port forward for node failed.")
+else:
+    print("Port forward succesfull for Node.")
+
+result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-FILESERVER", False)
+if not result:
+    print("Port forward for file Server failed.")
+else:
+    print("Port forward succesfull for File Server.")
 
 
 def debugp(out):
@@ -135,7 +149,7 @@ while True:
 
     if cmd == "refresh":
         dtrm.refresh()
-        print(dtrm.f2dadta)
+        print(dtrm.f2data)
 
     if cmd == "peers":
         print("IP: " + node.ip)
