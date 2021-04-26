@@ -119,7 +119,7 @@ while True:
     if "msg " in cmd:
         args = cmd.replace("msg ", "")
         print("sent msg: " + args)
-        node.message({"msg": args})
+        message({"msg": args})
 
     if cmd == "debug":
         node.debug = not node.debug
