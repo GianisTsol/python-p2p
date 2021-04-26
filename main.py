@@ -135,6 +135,7 @@ while True:
 
     if cmd == "refresh":
         dtrm.refresh()
+        print(dtrm.f2dadta)
 
     if cmd == "peers":
         print("IP: " + node.ip)
