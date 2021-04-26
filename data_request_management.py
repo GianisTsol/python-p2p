@@ -22,7 +22,7 @@ def refresh():
         f.extend(filenames)
         with open('resources.json', 'w') as f2:
             for file in filenames:
-                f2data[hashFile(file)] = file
+                f2data[hashFile(file)] = mypath + file
                 print(f2data)
                 json.dump(f2data, f2)
 

@@ -21,7 +21,9 @@ def debugp(out):
 
 def ConnectToNodes():
     for i in peers:
-        if i != "":
+        if i == node.ip:
+            del peers[peers.index(i)]
+        if i != "" and i != node.ip:
             node.connect_to(i, PORT)
 
 def message(dict, ex=[]):
@@ -32,8 +34,8 @@ def message(dict, ex=[]):
 
     node.network_send(dict, ex)
 
-def req_file(hash):
-    message({'req': hash})
+def req_file(fhash):
+    message({'req': fhash})
 
 def send_peers():
     global peers
@@ -73,7 +75,7 @@ def data_handler(data, n):
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         if dta['resp'] in requested:
             print("node " + dta['snid'] + " has our file!")
-            downloader = FileDownloader(dta['ip'], FILE_PORT, hash)
+            downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
             downloader.start()
 
     else:
@@ -101,8 +103,8 @@ def node_callback(event, node, other, data):
 node = Node("", PORT, FILE_PORT, node_callback) # start the node
 node.start()
 
-def requestFile(hash):
-    requested.append(hash)
+def requestFile(fhash):
+    requested.append(fhash)
     message({'req': args})
 
 time.sleep(1)

@@ -53,7 +53,7 @@ class Node(threading.Thread):
 
     def connect_to(self, host, port):
 
-        if host == self.ip:
+        if host == self.ip or host == "":
             self.debug_print("connect_to: Cannot connect with yourself!!")
             return False
 
@@ -76,7 +76,7 @@ class Node(threading.Thread):
             connected_node_id = str(sock.recv(4096).decode('utf-8'))
 
             if self.id == connected_node_id:
-                debug_print("own ip: " + host)
+                self.debug_print("own ip: " + host)
                 self.ip = host #set our own ip - this canbug if two nodes have the same id
                 sock.close()
                 return False
@@ -108,12 +108,16 @@ class Node(threading.Thread):
                 connected_node_id = str(connection.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
                 connection.send(self.id.encode('utf-8')) # Send my id to the connected node!
 
-                thread_client = self.create_new_connection(connection, connected_node_id, client_address[0], client_address[1])
-                thread_client.start()
+                if self.id != connected_node_id:
+                    thread_client = self.create_new_connection(connection, connected_node_id, client_address[0], client_address[1])
+                    thread_client.start()
 
-                self.nodes_connected.append(thread_client)
+                    self.nodes_connected.append(thread_client)
 
-                self.node_connected(thread_client)
+                    self.node_connected(thread_client)
+
+                else:
+                    connection.close()
 
             except socket.timeout:
                 pass

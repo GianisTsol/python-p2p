@@ -3,39 +3,42 @@ import socket
 import pickle
 import data_request_management as dtrm
 import time
+import struct
+import json
 
 class fileClientThread(threading.Thread):
     def __init__(self, ip, port, conn, file_requested):
-        super(fileServer, self).__init__() #CAll Thread.__init__()
+        super(fileClientThread, self).__init__() #CAll Thread.__init__()
         self.terminate_flag = threading.Event()
         self.ip = ip
         self.port = port
-        self.sock = sock
+        self.sock = conn
         self.file_requested = file_requested
 
-    def SendFile(self, filehash, buffer_size):
+    def SendFile(self, filehash):
         j = open("resources.json", "rb")
         content = json.load(j)
         j.close()
-        if filehash not in content:
-            print("File requested and connected but we do not have.")
-            return
+        filehash = str(filehash)
+        if not dtrm.have_file(filehash):
+            print('File requested to download but we do not have: ' + filehash)
+            self.sock.close()
         else:
             file = content[filehash]
-
-        f = open(file, 'rb')
-        data = f.read()
-        serialized_data = pickle.dumps(data)
-        self.sock.sendall(struct.pack('>I', len(serialized_data)))
-        self.sock.send(file.encode('utf-8'))
-        self.sock.sendall(serialized_data)
+            f = open(file, 'rb')
+            data = f.read()
+            serialized_data = pickle.dumps(data)
+            self.sock.sendall(struct.pack('>I', len(serialized_data)))
+            self.sock.send(file.encode('utf-8'))
+            self.sock.sendall(serialized_data)
 
     def stop(self):
         self.terminate_flag.set()
 
     def run(self):
-        while not self.terminate_flag.is_set():
-            SendFile(file_requested)
+        self.SendFile(self.file_requested)
+        time.sleep(0.05)
+        self.sock.close()
 
 class fileServer(threading.Thread):
     def __init__(self, parent, PORT):
@@ -85,15 +88,16 @@ class fileServer(threading.Thread):
 class FileDownloader(threading.Thread):
     def __init__(self, ip, port, hash):
         super(FileDownloader, self).__init__()
+
+        self.hash = str(hash)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(ip)
         self.conn.connect((ip, port))
         print("File Downloder Started")
 
     def run(self):
-        self.conn.send(hash.encode('utf-8'))
-        self.data_size = struct.unpack('>I', conn.recv(4))[0]
-        filename = str(conn.recv(4096).decode('utf-8')) #recieve file name
+        self.conn.send(self.hash.encode('utf-8'))
+        self.data_size = struct.unpack('>I', self.conn.recv(4))[0]
+        filename = str(self.conn.recv(4096).decode('utf-8')) #recieve file name
         received_payload = b""
         reamining_payload_size = data_size
         while reamining_payload_size != 0:
