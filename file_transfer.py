@@ -91,24 +91,29 @@ class FileDownloader(threading.Thread):
 
         self.hash = str(hash)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn.settimeout(10.0)
         self.conn.connect((ip, port))
         print("File Downloder Started")
 
     def run(self):
-        self.conn.send(self.hash.encode('utf-8'))
-        self.data_size = struct.unpack('>I', self.conn.recv(4))[0]
-        filename = str(self.conn.recv(4096).decode('utf-8')) #recieve file name
-        received_payload = b""
-        reamining_payload_size = data_size
-        while reamining_payload_size != 0:
-            received_payload += self.conn.recv(reamining_payload_size)
-            reamining_payload_size = self.data_size - len(received_payload)
-        data = pickle.loads(received_payload)
+        try:
+            self.conn.send(self.hash.encode('utf-8'))
+            self.data_size = struct.unpack('>I', self.conn.recv(4))[0]
+            filename = str(self.conn.recv(4096).decode('utf-8')) #recieve file name
+            received_payload = b""
+            reamining_payload_size = data_size
+            while reamining_payload_size != 0:
+                received_payload += self.conn.recv(reamining_payload_size)
+                reamining_payload_size = self.data_size - len(received_payload)
+            data = pickle.loads(received_payload)
 
-        self.conn.close()
+            self.conn.close()
 
-        f = open(filename, "w")
-        f.write(data)
-        f.close()
-        dtrm.refresh()
-        print("File Downloder Finished")
+            f = open(filename, "w")
+            f.write(data)
+            f.close()
+            dtrm.refresh()
+            print("File Downloder Finished")
+
+        except Exception as e:
+            self.debug_print("File Downloader: Server errored or timed out.")
