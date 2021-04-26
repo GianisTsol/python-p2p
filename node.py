@@ -78,7 +78,9 @@ class Node(threading.Thread):
             if self.id == connected_node_id:
                 debug_print("own ip: " + host)
                 self.ip = host #set our own ip - this canbug if two nodes have the same id
-                return
+                sock.close()
+                return False
+
             thread_client = self.create_new_connection(sock, connected_node_id, host, port)
             thread_client.start()
 
