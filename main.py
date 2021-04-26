@@ -3,6 +3,7 @@ import time
 import json
 import sys
 import data_request_management as dtrm
+from file_transfer import FileDownloader
 
 peers = []
 
@@ -10,6 +11,9 @@ msg_del_time = 30
 
 PORT = 65432
 FILE_PORT = 65433
+
+requested = [] # list of files we have requested.
+
 
 def debugp(out):
     if node.debug == True:
@@ -67,10 +71,12 @@ def data_handler(data, n):
 
     elif "resp" in dta and "snid" in dta:
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
-        debugp("Downloading files will be added in another version (probably never lol the dev sucks)")
-
+        if dta['resp'] in requested:
+            downloader = FileDownloader(serverip, self.file_port, hash)
+            downloader.start()
+    
     else:
-        debugp("Recieved an unknown or corrupt message")
+        debugp("Recieved an unknown or corrupt message type.")
 
 def node_callback(event, node, other, data):
     global peers
@@ -92,6 +98,9 @@ def node_callback(event, node, other, data):
 
 node = Node("", PORT, FILE_PORT, node_callback) # start the node
 node.start()
+
+def requestFile(hash):
+    message({'req': args})
 
 while True:
     cmd = input(">")
@@ -127,4 +136,4 @@ while True:
     if "req " in cmd:
         args = cmd.replace("req ", "")
         print("requesting file with hash: " + args)
-        message({'req': args})
+        requestFile(args)

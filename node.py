@@ -25,6 +25,7 @@ class Node(threading.Thread):
         self.host = host
         self.ip = host #own ip, will be changed by connection later
         self.port = port
+        self.file_port = file_port
 
         self.nodes_connected = []
 
@@ -42,7 +43,6 @@ class Node(threading.Thread):
     def debug_print(self, msg):
         if self.debug:
             print("[debug] " + str(msg))
-
 
     def network_send(self, message, exc=[]):
         for i in self.nodes_connected:

@@ -1,6 +1,7 @@
 import threading
 import socket
 import pickle
+import data_request_management as dtrm
 
 
 class fileClientThread(threading.Thread):
@@ -23,9 +24,9 @@ class fileClientThread(threading.Thread):
         f = open(file, 'rb')
         data = f.read()
         serialized_data = pickle.dumps(data)
-        conn.sendall(struct.pack('>I', len(serialized_data)))
-        conn.send(file.encode('utf-8'))
-        conn.sendall(serialized_data)
+        self.sock.sendall(struct.pack('>I', len(serialized_data)))
+        self.sock.send(file.encode('utf-8'))
+        self.sock.sendall(serialized_data)
 
     def stop(self):
         self.terminate_flag.set()
@@ -60,6 +61,7 @@ class fileServer(threading.Thread):
             file_requested = str(conn.recv(4096).decode('utf-8')) #recieve file hash
 
             newthread = fileClientThread(ip, port, conn, file_requested)
+            dtrm.refresh()
             newthread.start()
 
             self.threads.append(newthread)
@@ -69,12 +71,14 @@ class fileServer(threading.Thread):
             self.parent.debug_print("File Server stopped")
 
 class FileDownloader(threading.Thread):
-    def __init__(self, arg):
+    def __init__(self, ip, port, hash):
         super(FileDownloader, self).__init__()
+        self.work = False
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.conn.connect((TCP_IP, TCP_PORT))
+        self.conn.connect((ip, port))
 
     def run(self):
+        self.conn.send(hash.encode('utf-8'))
         self.data_size = struct.unpack('>I', conn.recv(4))[0]
         filename = str(conn.recv(4096).decode('utf-8')) #recieve file name
         received_payload = b""
@@ -89,3 +93,4 @@ class FileDownloader(threading.Thread):
         f = open(filename, "w")
         f.write(data)
         f.close()
+        dtrm.refresh()
