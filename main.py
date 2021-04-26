@@ -72,7 +72,7 @@ def data_handler(data, n):
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         if dta['resp'] in requested:
             print("node " + dta['snid'] + " has our file!")
-            downloader = FileDownloader(dta['ip'], self.file_port, hash)
+            downloader = FileDownloader(dta['ip'], FILE_PORT, hash)
             downloader.start()
 
     else:
