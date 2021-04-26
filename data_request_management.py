@@ -20,11 +20,10 @@ f = []
 def refresh():
     for (dirpath, dirnames, filenames) in walk(mypath):
         f.extend(filenames)
-        with open('resources.json', 'w') as f2:
-            for file in filenames:
-                f2data[hashFile(file)] = mypath + file
-            print(f2data)
-            json.dump(f2data, f2)
+    with open('resources.json', 'w') as f2:
+        for file in filenames:
+            f2data[hashFile(file)] = mypath + file
+        json.dump(f2data, f2)
 
 def have_file(hash):
     refresh()
