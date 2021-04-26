@@ -1,3 +1,4 @@
 ___pycache___
 *.pyc
 content/*
+resources.json
