@@ -14,7 +14,9 @@ class fileClientThread(threading.Thread):
         self.file_requested = file_requested
 
     def SendFile(self, filehash, buffer_size):
-        content = json.load("resources.json")
+        j = open("resources.json", "rb")
+        content = json.load(j)
+        j.close()
         if filehash not in content:
             print("File requested and connected but we do not have.")
             return
