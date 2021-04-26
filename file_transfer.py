@@ -117,4 +117,4 @@ class FileDownloader(threading.Thread):
             print("File Downloder Finished")
 
         except Exception as e:
-            self.debug_print("File Downloader: Server errored or timed out.")
+            print("File Downloader: Server errored or timed out.")
