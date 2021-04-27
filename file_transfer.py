@@ -16,7 +16,7 @@ class fileClientThread(threading.Thread):
         self.file_requested = file_requested
 
     def SendFile(self, filehash):
-        j = open("resources.json", "rb")
+        j = open("resources.json", "r")
         content = json.load(j)
         j.close()
         filehash = str(filehash)
@@ -25,11 +25,16 @@ class fileClientThread(threading.Thread):
             self.sock.close()
         else:
             file = content[filehash]
-            f = open(file, 'rb')
+            filep = "content/" + file
+            f = open(filep, 'rb')
             data = f.read()
+            f.close()
             serialized_data = pickle.dumps(data)
             self.sock.sendall(struct.pack('>I', len(serialized_data)))
+            time.sleep(0.1)
+            print("File: " + file)
             self.sock.send(file.encode('utf-8'))
+            time.sleep(0.1)
             self.sock.sendall(serialized_data)
 
     def stop(self):
@@ -87,30 +92,37 @@ class fileServer(threading.Thread):
         print("File Server stopped")
 
 class FileDownloader(threading.Thread):
-    def __init__(self, ip, port, hash):
+    def __init__(self, ip, port, fhash):
         super(FileDownloader, self).__init__()
-
-        self.hash = str(hash)
+        self.terminate_flag = threading.Event()
+        self.fhash = str(fhash)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.settimeout(10.0)
         self.conn.connect((ip, port))
         print("File Downloder Started")
 
+    def stop(self):
+        self.terminate_flag.set()
+
     def run(self):
         try:
-            self.conn.send(self.hash.encode('utf-8'))
-            self.data_size = struct.unpack('>I', self.conn.recv(4))[0]
-            filename = str(self.conn.recv(4096).decode('utf-8')) #recieve file name
+            self.conn.send(self.fhash.encode('utf-8'))
+            self.data_size = struct.unpack('>I', self.conn.recv(9))[0]
+            time.sleep(0.1)
+            print("file size: " + str(self.data_size))
+            self.filename = str(self.conn.recv(256).decode('utf-8')) #recieve file name
+            print("file name:" + str(self.filename))
+            time.sleep(0.1)
             received_payload = b""
-            reamining_payload_size = data_size
-            while reamining_payload_size != 0:
+            reamining_payload_size = self.data_size
+            while reamining_payload_size != 0 and not self.terminate_flag.is_set():
                 received_payload += self.conn.recv(reamining_payload_size)
                 reamining_payload_size = self.data_size - len(received_payload)
             data = pickle.loads(received_payload)
 
             self.conn.close()
 
-            f = open(filename, "w")
+            f = open("content/" + self.filename, "wb")
             f.write(data)
             f.close()
             dtrm.refresh()
@@ -118,3 +130,4 @@ class FileDownloader(threading.Thread):
 
         except Exception as e:
             print("File Downloader: Server errored or timed out.")
+            #raise(e)
