@@ -8,13 +8,13 @@ class gui(threading.Thread):
 
 
 
-    def openfile():
+    def openfile(self):
        filename = askopenfilename(parent=self.window)
        #Todo file selction stuff
 
 
 
-    def updateInfo(peers, knownpeers):
+    def updateInfo(self, peers, knownpeers):
         for i in peers:
             listbox.insert(peers.index(i), i.host)
 
