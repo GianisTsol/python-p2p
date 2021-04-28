@@ -5,6 +5,7 @@ import sys
 import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
+import gui
 
 peers = []
 
@@ -91,12 +92,14 @@ def data_handler(data, n):
             print("node " + dta['snid'] + " has our file!")
             downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
             downloader.start()
+            downloader.join()
 
     else:
         debugp("Recieved an unknown or corrupt message type.")
 
 def node_callback(event, node, other, data):
     global peers
+    gui.updateInfo(node.nodes_connected, peers)
     if event == "node_disconnected":
         if other.host in peers:
             peers.remove(other.host)

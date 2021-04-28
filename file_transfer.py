@@ -126,6 +126,7 @@ class FileDownloader(threading.Thread):
             f.write(data)
             f.close()
             dtrm.refresh()
+            self.finished = True
             print("File Downloder Finished")
 
         except Exception as e:
