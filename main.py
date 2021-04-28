@@ -5,7 +5,13 @@ import sys
 import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
-import gui
+
+if sys.argv[1] == "nogui":
+    pass
+    nogui = True
+else:
+    print("-- Use nogui option for console use. --")
+    import gui
 
 peers = []
 
@@ -99,7 +105,9 @@ def data_handler(data, n):
 
 def node_callback(event, node, other, data):
     global peers
-    gui.updateInfo(node.nodes_connected, peers)
+    global nogui
+    if not nogui:
+        gui.updateInfo(node.nodes_connected, peers)
     if event == "node_disconnected":
         if other.host in peers:
             peers.remove(other.host)
