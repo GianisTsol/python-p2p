@@ -6,12 +6,15 @@ import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
 
-if sys.argv[1] == "nogui":
-    pass
-    nogui = True
-else:
-    print("-- Use nogui option for console use. --")
-    import gui
+nogui = False
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == "nogui":
+        pass
+        nogui = True
+    else:
+        print("-- Use nogui option for console use. --")
+        import gui
 
 peers = []
 
