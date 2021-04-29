@@ -24,7 +24,7 @@ PORT = 65432
 FILE_PORT = 65433
 
 requested = [] # list of files we have requested.
-
+msgs = [] #hashes of recieved messages
 
 result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-NODE", False)
 if not result:
@@ -38,6 +38,10 @@ if not result:
 else:
     print("Port forward succesfull for File Server.")
 
+def updateGui():
+        global nogui
+        if not nogui:
+            gui.updateInfo(node.nodes_connected, peers)
 
 def debugp(out):
     if node.debug == True:
@@ -45,10 +49,8 @@ def debugp(out):
 
 def ConnectToNodes():
     for i in peers:
-        if i == node.ip:
-            del peers[peers.index(i)]
-        if i != "" and i != node.ip:
-            node.connect_to(i, PORT)
+        if not node.connect_to(i, PORT):
+            del peers[peers.index(i)] #delete wrong / own ip from peers
 
 def message(dict, ex=[]):
     #time that the message was sent
@@ -73,13 +75,14 @@ def data_handler(data, n):
     if "peers" in dta:
         #peers handling
         for i in dta["peers"]:
-            if i not in peers and i != "":
+            if i not in peers and i != "" and i != node.ip:
                 peers.append(i)
 
         debugp("Known Peers: " + str(peers))
         ConnectToNodes() # cpnnect to new nodes
         return
     elif "msg" in dta and "time" in dta:
+        #todo : ad dmessages mo msgs with hash not to be resent on network loop
         #handle message data.
         debugp("Incomig Message: " + dta["msg"])
         #check if the message hasn't expired.
@@ -108,9 +111,7 @@ def data_handler(data, n):
 
 def node_callback(event, node, other, data):
     global peers
-    global nogui
-    if not nogui:
-        gui.updateInfo(node.nodes_connected, peers)
+
     if event == "node_disconnected":
         if other.host in peers:
             peers.remove(other.host)
@@ -126,6 +127,8 @@ def node_callback(event, node, other, data):
 
     else:
         print(event)
+
+    updateGui()
 
 
 node = Node("", PORT, FILE_PORT, node_callback) # start the node
@@ -158,6 +161,8 @@ while True:
 
 
     if cmd == "exit":
+        if not nogui:
+            gui.guic.stop()
         node.stop()
         exit(0)
 

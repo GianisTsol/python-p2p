@@ -21,7 +21,7 @@ class Node(threading.Thread):
 
         self.debug = True
 
-        self.dead_time = 30 #time to disconect from node if not pinged
+        self.dead_time = 30 #time to disconect from node if not pinged, nodes ping after 20s
 
         self.host = host
         self.ip = host #own ip, will be changed by connection later
@@ -33,6 +33,11 @@ class Node(threading.Thread):
         self.id = str(uuid.uuid4())
 
         self.max_peers = 10
+
+        hostname = socket.gethostname()
+
+        self.local_ip = socket.gethostbyname(hostname)
+
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -54,7 +59,7 @@ class Node(threading.Thread):
 
     def connect_to(self, host, port):
 
-        if host == self.ip or host == "":
+        if host == self.ip or host == "" or host == self.local_ip:
             self.debug_print("connect_to: Cannot connect with yourself!!")
             return False
 
@@ -74,7 +79,7 @@ class Node(threading.Thread):
 
 
             sock.send(self.id.encode('utf-8'))
-            connected_node_id = str(sock.recv(4096).decode('utf-8'))
+            connected_node_id = str(sock.recv(128).decode('utf-8'))
 
             if self.id == connected_node_id:
                 self.debug_print("own ip: " + host)
@@ -106,7 +111,7 @@ class Node(threading.Thread):
                 connection, client_address = self.sock.accept()
 
                 # Basic information exchange (not secure) of the id's of the nodes!
-                connected_node_id = str(connection.recv(4096).decode('utf-8')) # When a node is connected, it sends it id!
+                connected_node_id = str(connection.recv(128).decode('utf-8')) # When a node is connected, it sends it id!
                 connection.send(self.id.encode('utf-8')) # Send my id to the connected node!
 
                 if self.id != connected_node_id:

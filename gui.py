@@ -6,20 +6,31 @@ class gui(threading.Thread):
     def __init__(self):
         super(gui, self).__init__()
 
-
-
     def openfile(self):
        filename = askopenfilename(parent=self.window)
        #Todo file selction stuff
 
-
-
     def updateInfo(self, peers, knownpeers):
+        self.listbox.delete(0, tk.END)
+        self.peers = peers
         for i in peers:
-            listbox.insert(peers.index(i), i.host)
+            self.listbox.insert(peers.index(i), i.host)
 
-        my_label.config(text = "Connected Peers: " + str(len(peers)))
-        my_label1.config(text = "Known Peers: " + str(len(knownpeers)))
+        self.my_label.config(text = "Connected Peers: " + str(len(peers)) + " | Total Known Peers: " + str(len(knownpeers)))
+
+    def GetPeerInfo(self, event):
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            data = event.widget.get(index)
+            for i in self.peers:
+                if i.host == data:
+                    self.info.delete(1.0, tk.END)
+                    self.info.insert(1.0, "ID: " + i.id)
+                    self.info.insert(2.0, "IP: " + i.host)
+
+    def stop(self):
+        self.window.quit
 
     def run(self):
         self.window = tk.Tk()
@@ -33,29 +44,43 @@ class gui(threading.Thread):
         self.window.config(menu=menubar)
 
 
-        self.window.geometry("500x200")
-        frame1 = tk.Frame(master=self.window, width=200, height=100)
-        frame2 = tk.Frame(master=self.window, width=200, height=100)
+        self.window.geometry("600x400")
+        top1 = tk.Frame(master=self.window)
+        top2 = tk.Frame(master=self.window, bg="grey45")
+        top3 = tk.Frame(master=self.window)
+        frame2 = tk.Frame(master=top1)
+        frame3 = tk.Frame(master=top3)
 
-        listbox = tk.Listbox(frame1)
+        self.my_label = tk.Label(top1, text = "LOADING")
+        self.my_label.pack()
 
-        my_label = tk.Label(frame2,
-                         text = "Connected Peers: NaN")
-        my_label1 = tk.Label(frame2,
-                         text = "Total Known Peers: NaN")
+        self.listbox = tk.Listbox(top2)
+        #self.listbox.bindtags((str(self.listbox), str(self.window), "all"))
+        self.listbox.bind("<<ListboxSelect>>", self.GetPeerInfo)
+        self.listbox.pack(fill=tk.X)
+        self.listbox.configure(bg="grey75", highlightthickness=0, relief="flat")
 
-        my_label.pack()
-        my_label1.pack()
+        self.info = tk.Text(top3, height=3, borderwidth=0)
+        self.info.pack()
+        self.info.configure(state="disabled")
+        self.info.configure(bg=self.window.cget('bg'), relief="flat")
 
-        listbox.pack()
+        self.messagebox = tk.Text(frame3, height=15, width=65, borderwidth=1)
+        self.messagebox.pack()
+        self.messagebox.configure(state="disabled")
 
-        frame1.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        top1.pack(fill=tk.X)
+        tk.Frame(master=self.window, height=1, bg="black").pack(fill=tk.X)
+        top2.pack(fill=tk.X)
+        tk.Frame(master=self.window, height=1, bg="black").pack(fill=tk.X)
+        top3.pack(fill=tk.X)
         frame2.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        frame3.pack(fill=tk.BOTH, expand=True)
         self.window.mainloop()
 
 
-a = gui()
-a.start()
+guic = gui()
+guic.start()
 
 def updateInfo(peers, knownpeers):
-    a.updateInfo(peers, knownpeers)
+    guic.updateInfo(peers, knownpeers)
