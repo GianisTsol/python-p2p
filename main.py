@@ -6,15 +6,6 @@ import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
 
-nogui = False
-
-if len(sys.argv) > 1:
-    if sys.argv[1] == "nogui":
-        pass
-        nogui = True
-else:
-    print("-- Use nogui option for console use. --")
-    import gui
 
 peers = []
 
@@ -37,11 +28,6 @@ if not result:
     print("Port forward for file Server failed.")
 else:
     print("Port forward succesfull for File Server.")
-
-def updateGui():
-        global nogui
-        if not nogui:
-            gui.updateInfo(node.nodes_connected, peers)
 
 def debugp(out):
     if node.debug == True:
@@ -128,9 +114,6 @@ def node_callback(event, node, other, data):
     else:
         print(event)
 
-    updateGui()
-
-
 node = Node("", PORT, FILE_PORT, node_callback) # start the node
 node.start()
 
@@ -161,8 +144,6 @@ while True:
 
 
     if cmd == "exit":
-        if not nogui:
-            gui.guic.stop()
         node.stop()
         exit(0)
 
