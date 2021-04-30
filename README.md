@@ -28,3 +28,15 @@ python main.py
 ## Issues
 - mostly security. Do not use this for production, only fiddling around.
   I am not responsible if you get hacked because of security vulnerabillities here.
+
+## Commands
+
+- `msg` - send a message to all other connected peers.
+- `req`- request a file by hash
+- `refresh` - refresh all files in content/ directory and get their hashes to share wit ohers. This hash is used above.
+- `peers` - Get a list of known peers and connected peers. Also their last ping.
+- `connect` - The most importsnt command. Use `connect [someip]` to connect to a node and join the network.
+- `debug` - Toggles debug mode. I suggest you leave this on to debug issues.
+- `exit` - Stop all threadsand exit.
+
+If this project gets enough stars Ill work on it and implement more features and security.
