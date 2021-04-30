@@ -159,7 +159,7 @@ class Node(threading.Thread):
 
 
     def node_message(self, node, data):
-        self.debug_print("node_message: " + node.id + ": " + str(json.loads(data)))
+        #self.debug_print("node_message: " + node.id + ": " + str(json.loads(data)))
         if self.callback is not None:
             self.callback("node_message", self, node, json.loads(data))
 

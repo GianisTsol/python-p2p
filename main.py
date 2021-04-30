@@ -5,6 +5,7 @@ import sys
 import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
+import hashlib
 
 
 peers = []
@@ -15,7 +16,7 @@ PORT = 65432
 FILE_PORT = 65433
 
 requested = [] # list of files we have requested.
-msgs = [] #hashes of recieved messages
+msgs = {"lastcheck": time.time()} #hashes of recieved messages
 
 result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-NODE", False)
 if not result:
@@ -40,9 +41,15 @@ def ConnectToNodes():
 
 def message(dict, ex=[]):
     #time that the message was sent
-    dict['time'] = str(time.time())
-    #sender node id
-    dict['snid'] = str(node.id)
+    if "time" not in dict:
+        dict['time'] = str(time.time())
+
+    if "snid" not in dict:
+        #sender node id
+        dict['snid'] = str(node.id)
+
+    if "msg" not in dict:
+        dict['msg'] = "Automated data forward."
 
     node.network_send(dict, ex)
 
@@ -57,6 +64,7 @@ def send_peers():
 
 def data_handler(data, n):
     global peers
+    global msgs
     dta = data
     if "peers" in dta:
         #peers handling
@@ -67,33 +75,44 @@ def data_handler(data, n):
         debugp("Known Peers: " + str(peers))
         ConnectToNodes() # cpnnect to new nodes
         return
-    elif "msg" in dta and "time" in dta:
-        #todo : ad dmessages mo msgs with hash not to be resent on network loop
-        #handle message data.
-        debugp("Incomig Message: " + dta["msg"])
+    if "msg" in dta and "time" in dta:
+        hash_object = hashlib.md5(dta["msg"].encode("utf-8"))
+        msghash = str(hash_object.hexdigest())
+        print(msghash)
+
         #check if the message hasn't expired.
         if float(time.time()) - float(dta['time']) < float(msg_del_time):
-            message(dta, ex=n)
+            if msghash not in msgs:
+                msgs[msghash] = time.time()
+                debugp("Incomig Message: " + dta["msg"])
+                message(dta, ex=n)
+            else:
+                #debugp("expired:" + dta['msg'])
+                if time.time() - msgs[msghash] > msg_del_time:
+                    print(time.time() - msgs[msghash])
+                    del msgs[msghash]
         else:
             #if message is expired
             debugp("expired:" + dta['msg'])
+
+        if len(msgs) > len(peers) * 20:
+            for i in msgs:
+                if time.time() - msgs[i] > msg_del_time:
+                    del msgs[i]
         return
-    elif "req" in dta:
+    if "req" in dta:
         if dtrm.have_file(dta['req']):
             message({"resp": dta['req'], "ip": node.ip})
         else:
             debugp("recieved request for file: " + dta['req'] + " but we do not have it.")
 
-    elif "resp" in dta and "snid" in dta and "ip" in dta:
+    if "resp" in dta and "snid" in dta and "ip" in dta:
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         if dta['resp'] in requested:
             print("node " + dta['snid'] + " has our file!")
             downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
             downloader.start()
             downloader.join()
-
-    else:
-        debugp("Recieved an unknown or corrupt message type.")
 
 def node_callback(event, node, other, data):
     global peers
