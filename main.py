@@ -16,19 +16,11 @@ PORT = 65432
 FILE_PORT = 65433
 
 requested = [] # list of files we have requested.
-msgs = {"lastcheck": time.time()} #hashes of recieved messages
+msgs = {} #hashes of recieved messages
 
-result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-NODE", False)
-if not result:
-    print("Port forward for node failed.")
-else:
-    print("Port forward succesfull for Node.")
+portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "", True)
+portforwardlib.forwardPort(FILE_PORT, FILE_PORT, None, None, False, "TCP", 0, "", True)
 
-result = portforwardlib.forwardPort(PORT, PORT, None, None, False, "TCP", 0, "PYHTON-P2P-FILESERVER", False)
-if not result:
-    print("Port forward for file Server failed.")
-else:
-    print("Port forward succesfull for File Server.")
 
 def debugp(out):
     if node.debug == True:
@@ -102,7 +94,8 @@ def data_handler(data, n):
         return
     if "req" in dta:
         if dtrm.have_file(dta['req']):
-            message({"resp": dta['req'], "ip": node.ip})
+            message({"resp": dta['req'], "ip": node.ip, "localip": node.local_ip})
+            debugp("recieved request for file: " + dta['req'] + " and we have it.")
         else:
             debugp("recieved request for file: " + dta['req'] + " but we do not have it.")
 
@@ -110,9 +103,15 @@ def data_handler(data, n):
         debugp("node: " + dta['snid']+" has file " + dta['resp'])
         if dta['resp'] in requested:
             print("node " + dta['snid'] + " has our file!")
-            downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
-            downloader.start()
-            downloader.join()
+            if dta['ip'] == "":
+                if dta['localip'] != '':
+                downloader = FileDownloader(dta['localip'], FILE_PORT, str(dta['resp']))
+                downloader.start()
+                downloader.join()
+            else:
+                downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
+                downloader.start()
+                downloader.join()
 
 def node_callback(event, node, other, data):
     global peers
@@ -164,6 +163,8 @@ while True:
 
     if cmd == "exit":
         node.stop()
+        portforwardlib.forwardPort(PORT, PORT, None, None, True, "TCP", 0, "PYHTON-P2P-NODE", True)
+        portforwardlib.forwardPort(FILE_PORT, FILE_PORT, None, None, True, "TCP", 0, "PYHTON-P2P-FILESERVER", True)
         exit(0)
 
     if cmd == "refresh":
@@ -173,11 +174,10 @@ while True:
     if cmd == "peers":
         print("IP: " + node.ip)
         debugp(peers)
-        buf='--------------\n'
-        for i in node.nodes_connected: buf = buf+'\n'+i.id+' ('+ i.host + ') - ' + str(time.time() - i.last_ping) + "s"
-        if len(peers)==0: buf = buf + "NO PEERS CONNECTED\n"
-        buf = buf + '\n--------------'
-        print(buf)
+        print('--------------')
+        for i in node.nodes_connected: print(i.id+' ('+ i.host + ') - ' + str(time.time() - i.last_ping) + "s")
+        if len(peers)==0: print("NO PEERS CONNECTED")
+        print('--------------')
 
     if "req " in cmd:
         args = cmd.replace("req ", "")

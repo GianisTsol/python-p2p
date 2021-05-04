@@ -73,7 +73,7 @@ class fileServer(threading.Thread):
                 self.parent.debug_print('File Server conection from: '+ str(ip))
 
                 file_requested = str(conn.recv(4096).decode('utf-8')) #recieve file hash
-
+                print("Sending file: " + file_requested)
                 newthread = fileClientThread(ip, port, conn, file_requested)
                 dtrm.refresh()
                 newthread.start()
