@@ -91,7 +91,6 @@ def data_handler(data, n):
             for i in msgs:
                 if time.time() - msgs[i] > msg_del_time:
                     del msgs[i]
-        return
     if "req" in dta:
         if dtrm.have_file(dta['req']):
             message({"resp": dta['req'], "ip": node.ip, "localip": node.local_ip})
