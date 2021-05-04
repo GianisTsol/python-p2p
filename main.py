@@ -105,9 +105,9 @@ def data_handler(data, n):
             print("node " + dta['snid'] + " has our file!")
             if dta['ip'] == "":
                 if dta['localip'] != '':
-                downloader = FileDownloader(dta['localip'], FILE_PORT, str(dta['resp']))
-                downloader.start()
-                downloader.join()
+                    downloader = FileDownloader(dta['localip'], FILE_PORT, str(dta['resp']))
+                    downloader.start()
+                    downloader.join()
             else:
                 downloader = FileDownloader(dta['ip'], FILE_PORT, str(dta['resp']))
                 downloader.start()
