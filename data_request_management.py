@@ -18,6 +18,7 @@ def hashFile(filepath):
 
 f = []
 def refresh():
+    f2data = {}
     for (dirpath, dirnames, filenames) in walk(mypath):
         f.extend(filenames)
     with open('resources.json', 'w') as f2:
