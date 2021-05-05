@@ -174,7 +174,7 @@ while True:
         print("IP: " + node.ip)
         debugp(peers)
         print('--------------')
-        for i in node.nodes_connected: print(i.id+' ('+ i.host + ') - ' + str(time.time() - i.last_ping) + "s")
+        for i in node.nodes_connected: print(i.id+' ('+ i.host + ') - ' + str(time.time() - int(i.last_ping)) + "s")
         if len(peers)==0: print("NO PEERS CONNECTED")
         print('--------------')
 

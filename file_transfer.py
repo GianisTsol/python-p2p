@@ -96,6 +96,7 @@ class FileDownloader(threading.Thread):
         super(FileDownloader, self).__init__()
         self.terminate_flag = threading.Event()
         self.fhash = str(fhash)
+        self.invalid_chars = ["/", "\", "|", "*", "<", ">", ":", "?", '"']
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.settimeout(10.0)
         self.conn.connect((ip, port))
@@ -112,6 +113,11 @@ class FileDownloader(threading.Thread):
             print("file size: " + str(self.data_size))
             self.filename = str(self.conn.recv(256).decode('utf-8')) #recieve file name
             print("file name:" + str(self.filename))
+            for i in self.invalid_chars:
+                if i in self.filename:
+                    print("INVALID FILE NAME. ABORTING.")
+                    self.stop()
+                    return
             time.sleep(0.1)
             received_payload = b""
             reamining_payload_size = self.data_size
