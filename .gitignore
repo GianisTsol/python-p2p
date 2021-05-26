@@ -3,3 +3,4 @@ ___pycache___
 resources.json
 content/*
 !content/test.txt
+test.py

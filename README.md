@@ -4,6 +4,8 @@ A totaly decentralized python peer to peer network.
 
 The code provides a simple network structure for information exchange between peers.
 
+Using https://github.com/gryphius/port-forward for port forward by upnp.
+
 # Usage
 #### Install requirements:
 There ae no requirements yet, this is here for redundancy reasons.
@@ -17,11 +19,15 @@ python main.py
 ```
 ## Features
 
+- When a node connects no another it will recieve a list of active node to connect to.
+- Deticated file downloader and servr. When a node requests a file by its hash it will connect
+to a node that has it and download it. Files can be shared by placing the in the `content/` directory and the
+will be detectd with a refresh. This can be expanded to become like torrents.
 - Peer discovery. Every node gets a list of neighbours when connected.
 - Messages run he entire network, so every node can get every info out there.
   This is not very good for big networks but it works on a small scale and sending
   rate can be edited for scale.
-  
+
 - Nodes ping eahother and decide if a node is dead.
 - more idk read the code
 

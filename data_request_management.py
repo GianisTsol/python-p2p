@@ -1,34 +1,44 @@
 import json
 import hashlib
-from os import walk
 import subprocess
+import os
 
-f2data= {}
-mypath = "content/"
+files = {}
+download_path = "content/"
 
 def hashFile(filepath):
-    filepath = mypath + filepath
     hasher = hashlib.md5()
-    with open(filepath, 'rb') as afile:
-        buf = afile.read()
-        while len(buf) > 0:
-            hasher.update(buf)
+    try:
+        with open(filepath, 'rb') as afile:
             buf = afile.read()
-    return(hasher.hexdigest())
+            while len(buf) > 0:
+                hasher.update(buf)
+                buf = afile.read()
+        return(hasher.hexdigest())
+    except:
+        print("Couldn't find/hash file " + filepath)
 
-f = []
+
 def refresh():
-    f2data = {}
-    for (dirpath, dirnames, filenames) in walk(mypath):
+    f = []
+    for (dirpath, dirnames, filenames) in os.walk(download_path):
         f.extend(filenames)
-    with open('resources.json', 'w') as f2:
         for file in filenames:
-            f2data[hashFile(file)] = file
-        json.dump(f2data, f2)
+            addfile(download_path + file)
+    for i in list(files):
+        if files[i]["path"] != None:
+            if not os.path.exists(files[i]["path"]):
+                del files[i]
+        with open('resources.json', 'w') as f2:
+            json.dump(files, f2)
+
+def addfile(path):
+    name = os.path.basename(path)
+    files[hashFile(path)] = {"name" : name, "path" : path}
 
 def have_file(hash):
     refresh()
-    if hash in f2data:
+    if hash in files:
         return(True)
 
 refresh()

@@ -6,7 +6,7 @@ import data_request_management as dtrm
 from file_transfer import FileDownloader
 import portforwardlib
 import hashlib
-
+import os
 
 peers = []
 
@@ -140,45 +140,55 @@ def requestFile(fhash):
 
 time.sleep(1)
 
-while True:
-    cmd = input(">")
-    if "connect " in cmd:
-        args = cmd.replace("connect ", "")
-        print("connect to: " + args)
-        node.connect_to(args, PORT)
+if __name__ == "__main__":
+    while True:
+        cmd = input(">")
+        if "connect " in cmd:
+            args = cmd.replace("connect ", "")
+            print("connect to: " + args)
+            node.connect_to(args, PORT)
 
-    if "msg " in cmd:
-        args = cmd.replace("msg ", "")
-        print("sent msg: " + args)
-        message({"msg": args})
+        if "msg " in cmd:
+            args = cmd.replace("msg ", "")
+            print("sent msg: " + args)
+            message({"msg": args})
 
-    if cmd == "debug":
-        node.debug = not node.debug
-        print("Debug is now " + str(node.debug))
+        if cmd == "debug":
+            node.debug = not node.debug
+            print("Debug is now " + str(node.debug))
 
-    if cmd == "stop":
-        node.stop()
+        if cmd == "stop":
+            node.stop()
 
 
-    if cmd == "exit":
-        node.stop()
-        portforwardlib.forwardPort(PORT, PORT, None, None, True, "TCP", 0, "PYHTON-P2P-NODE", True)
-        portforwardlib.forwardPort(FILE_PORT, FILE_PORT, None, None, True, "TCP", 0, "PYHTON-P2P-FILESERVER", True)
-        exit(0)
+        if cmd == "exit":
+            node.stop()
+            portforwardlib.forwardPort(PORT, PORT, None, None, True, "TCP", 0, "PYHTON-P2P-NODE", True)
+            portforwardlib.forwardPort(FILE_PORT, FILE_PORT, None, None, True, "TCP", 0, "PYHTON-P2P-FILESERVER", True)
+            exit(0)
 
-    if cmd == "refresh":
-        dtrm.refresh()
-        print(dtrm.f2data)
+        if cmd == "refresh":
+            dtrm.refresh()
+            print(dtrm.files)
 
-    if cmd == "peers":
-        print("IP: " + node.ip)
-        debugp(peers)
-        print('--------------')
-        for i in node.nodes_connected: print(i.id+' ('+ i.host + ') - ' + str(time.time() - int(i.last_ping)) + "s")
-        if len(peers)==0: print("NO PEERS CONNECTED")
-        print('--------------')
+        if "add " in cmd:
+            args = cmd.replace("add ", "")
+            print("Adding file: " + args)
+            try:
+                dtrm.addfile(args)
+                refresh()
+            except Exception as e:
+                print(e)
 
-    if "req " in cmd:
-        args = cmd.replace("req ", "")
-        print("requesting file with hash: " + args)
-        requestFile(args)
+        if cmd == "peers":
+            print("IP: " + node.ip)
+            debugp(peers)
+            print('--------------')
+            for i in node.nodes_connected: print(i.id+' ('+ i.host + ') - ' + str(time.time() - int(i.last_ping)) + "s")
+            if len(peers)==0: print("NO PEERS CONNECTED")
+            print('--------------')
+
+        if "req " in cmd:
+            args = cmd.replace("req ", "")
+            print("requesting file with hash: " + args)
+            requestFile(args)

@@ -24,8 +24,8 @@ class fileClientThread(threading.Thread):
             print('File requested to download but we do not have: ' + filehash)
             self.sock.close()
         else:
-            file = content[filehash]
-            filep = "content/" + file
+            file = content[filehash].name
+            filep = content[filehash].path + file
             f = open(filep, 'rb')
             data = f.read()
             f.close()
@@ -96,7 +96,7 @@ class FileDownloader(threading.Thread):
         super(FileDownloader, self).__init__()
         self.terminate_flag = threading.Event()
         self.fhash = str(fhash)
-        self.invalid_chars = ["/", "\", "|", "*", "<", ">", ":", "?", '"']
+        self.invalid_chars = ["/", "\\", "|", "*", "<", ">", ":", "?", '"']
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.settimeout(10.0)
         self.conn.connect((ip, port))
