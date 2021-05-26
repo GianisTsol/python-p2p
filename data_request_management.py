@@ -1,6 +1,5 @@
 import json
 import hashlib
-import subprocess
 import os
 
 files = {}
