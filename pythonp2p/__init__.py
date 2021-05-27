@@ -6,4 +6,4 @@ __main__ = "pythonp2p"
 __all__ = ["node", "data_request_management", "file_transfer", "portforwardlib"]
 
 from .node import Node
-import .data_request_management as files
+from . import data_request_management as files

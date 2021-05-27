@@ -16,6 +16,47 @@ python setup.py install
 
 ## Implementing your own projects
 
+###Import
+You can import the module after installing by:
+`import pythonp2p`
+
+###Start
+Firstly you need to initialize the node and then start it:
+`node = pythonp2p.Node()
+node.start()`
+
+Advanced arguments:
+`host`: The host where the socket run on. Default is "". Dont touch this if you dont have a weird network config.
+`port`: the port where the nodes communicate. Default 65432
+`file_server_port`: the port which the server for file transfer is listening on. It is optional. Default 65433
+
+###Connection
+To connect to a another node do:
+`node.connect_to(ip)`
+
+`ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to.
+This is automatic.
+
+Note: You can also specify a `port` but it is not recommended since all of the network must run on the same port.
+
+###Communication
+To send data to the network you can do:
+`node.message(data)`
+
+`data`: a dictionary to be sent to all other nodes. Please do not use `time`, `snid`, `req`, `resp` and `peers` as
+dict keys as they are used by the network internally. You can use `msg` as a key to send strings. There is message filtering.
+
+###Files
+
+`node.addfile(path)` or `pythonp2p.files.addfile(path)`: Adds a file to the node so ith can be requested by others.
+
+`path`: The absolute path of the file in the computer.
+This function returns the hash which can be used by other nodes to request the file.
+
+`node.requestFile(filehash)`: Send a request to the network and if the file is available, download it.
+
+`filehash`: The hash of the file to request in string format. Look above on `addfile` to get that.
+
 
 ### Commands
 If running node.py directly you will need this.

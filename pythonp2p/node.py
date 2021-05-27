@@ -103,7 +103,7 @@ class NodeConnection(threading.Thread):
         time.sleep(1)
 
 class Node(threading.Thread):
-    def __init__(self, host, port, file_port):
+    def __init__(self, host="", port=65432, file_port=65433):
 
         self.terminate_flag = threading.Event()
 
@@ -156,7 +156,7 @@ class Node(threading.Thread):
             else:
                 i.send(json.dumps(message))
 
-    def connect_to(self, host, port):
+    def connect_to(self, host, port=PORT):
 
         if host == self.ip or host == "" or host == self.local_ip:
             self.debug_print("connect_to: Cannot connect with yourself!!")
@@ -287,7 +287,8 @@ class Node(threading.Thread):
             ConnectToNodes() # cpnnect to new nodes
             return
         if "msg" in dta and "time" in dta:
-            hash_object = hashlib.md5(dta["msg"].encode("utf-8"))
+            sth = dta['msg'] + str(dta['time'])
+            hash_object = hashlib.md5(sth.encode("utf-8"))
             msghash = str(hash_object.hexdigest())
             print(msghash)
 
@@ -335,7 +336,7 @@ class Node(threading.Thread):
         self.message({'req': args})
 
     def addfile(self, path):
-        dtrm.addfile(path)
+        return(dtrm.addfile(path))
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)

@@ -5,6 +5,7 @@ import os
 files = {}
 download_path = "content/"
 
+
 def hashFile(filepath):
     hasher = hashlib.md5()
     try:
@@ -28,14 +29,12 @@ def refresh():
         if files[i]["path"] != None:
             if not os.path.exists(files[i]["path"]):
                 del files[i]
-        with open('resources.json', 'w') as f2:
-            json.dump(files, f2)
 
 def addfile(path):
     name = os.path.basename(path)
     h = hashFile(path)
     files[h] = {"name" : name, "path" : path}
-    return(H)
+    return(h)
 
 def have_file(hash):
     refresh()
