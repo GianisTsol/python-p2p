@@ -1,6 +1,5 @@
 ___pycache___
 *.pyc
-resources.json
 content/*
 !content/test.txt
 test.py

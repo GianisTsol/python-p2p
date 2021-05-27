@@ -7,9 +7,9 @@ import sys
 import time
 import random
 import hashlib
-import data_request_management as dtrm
-from file_transfer import FileDownloader, fileServer
-import portforwardlib
+from . import data_request_management as dtrm
+from .file_transfer import FileDownloader, fileServer
+from . import portforwardlib
 
 msg_del_time = 30
 PORT = 65432
@@ -333,6 +333,9 @@ class Node(threading.Thread):
     def requestFile(self, fhash):
         self.requested.append(fhash)
         self.message({'req': args})
+
+    def addfile(self, path):
+        dtrm.addfile(path)
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)

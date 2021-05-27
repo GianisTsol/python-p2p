@@ -33,11 +33,16 @@ def refresh():
 
 def addfile(path):
     name = os.path.basename(path)
-    files[hashFile(path)] = {"name" : name, "path" : path}
+    h = hashFile(path)
+    files[h] = {"name" : name, "path" : path}
+    return(H)
 
 def have_file(hash):
     refresh()
     if hash in files:
         return(True)
+
+def getallfiles():
+    return(files)
 
 refresh()

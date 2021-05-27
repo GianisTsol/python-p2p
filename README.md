@@ -6,20 +6,19 @@ The code provides a simple network structure for information exchange between pe
 
 Using https://github.com/gryphius/port-forward for port forward by upnp.
 
-# Usage
-#### Install requirements:
-There ae no requirements yet, this is here for redundancy reasons.
-```
-pip install -r requirements.txt
-```
-note: tested on python 3.6
+# Install
+note: tested on python 3.6+
 
-To run the node and get a console do:
+To install the package do:
 ```
-python node.py
+python setup.py install
 ```
+
+## Implementing your own projects
+
+
 ### Commands
-
+If running node.py directly you will need this.
 - `msg` - send a message to all other connected peers.
 - `req`- request a file by hash
 - `add` - adds a file by path to be downloaded by other node.
@@ -28,9 +27,6 @@ python node.py
 - `connect` - The most importsnt command. Use `connect [someip]` to connect to a node and join the network.
 - `debug` - Toggles debug mode. I suggest you leave this on to debug issues.
 - `exit` - Stop all threadsand exit.
-
-## Implementing your own projects
-
 
 # Features
 

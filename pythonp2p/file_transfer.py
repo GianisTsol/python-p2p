@@ -1,7 +1,7 @@
 import threading
 import socket
 import pickle
-import data_request_management as dtrm
+from . import data_request_management as dtrm
 import time
 import struct
 import json
@@ -16,9 +16,7 @@ class fileClientThread(threading.Thread):
         self.file_requested = file_requested
 
     def SendFile(self, filehash):
-        j = open("resources.json", "r")
-        content = json.load(j)
-        j.close()
+        content = dtrm.getallfiles()
         filehash = str(filehash)
         if not dtrm.have_file(filehash):
             print('File requested to download but we do not have: ' + filehash)
