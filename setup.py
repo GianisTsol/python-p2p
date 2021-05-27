@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="pyhonp2p",
-    version="1.4",
+    name="pythonp2p",
+    version="1.5",
     author="GianisTsol",
     author_email="giannisetsolakis@gmail.com",
     description="A peer to peer network able to transfer data and files",
