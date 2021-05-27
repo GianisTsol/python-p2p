@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pyhonp2p",
-    version="1.2",
+    version="1.3",
     author="GianisTsol",
     author_email="giannisetsolakis@gmail.com",
     description="A peer to peer network able to transfer data and files",
