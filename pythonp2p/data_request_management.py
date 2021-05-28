@@ -28,13 +28,15 @@ def refresh():
     for i in list(files):
         if files[i]["path"] != None:
             if not os.path.exists(files[i]["path"]):
+                print("Removing file that no longer exists: " + str(files[i]["path"]))
                 del files[i]
+    print(files)
 
 def addfile(path):
     name = os.path.basename(path)
     h = hashFile(path)
     files[h] = {"name" : name, "path" : path}
-    return(h)
+    return(str(h))
 
 def have_file(hash):
     refresh()

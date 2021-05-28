@@ -266,9 +266,6 @@ class Node(threading.Thread):
 
         self.network_send(dict, ex)
 
-    def req_file(self, fhash):
-        self.message({'req': fhash})
-
     def send_peers(self):
         buf = {'peers': self.peers}
         self.message(buf)
@@ -289,18 +286,13 @@ class Node(threading.Thread):
             sth = str(dta['msg']) + str(dta['time'])
             hash_object = hashlib.md5(sth.encode("utf-8"))
             msghash = str(hash_object.hexdigest())
-            print(msghash)
 
             #check if the message hasn't expired.
             if float(time.time()) - float(dta['time']) < float(msg_del_time):
                 if msghash not in self.msgs:
                     self.msgs[msghash] = time.time()
-                    self.debug_print("Incomig Message: " + dta["msg"])
+                    self.debug_print("Incomig Message: " + dta["msg"] + " - " + msghash + " " + str(dta))
                     self.message(dta, ex=n)
-                else:
-                    if time.time() - self.msgs[msghash] > msg_del_time:
-                        print(time.time() - self.msgs[msghash])
-                        del self.msgs[msghash]
             else:
                 #if message is expired
                 self.debug_print("expired:" + dta['msg'])
@@ -332,10 +324,12 @@ class Node(threading.Thread):
 
     def requestFile(self, fhash):
         self.requested.append(fhash)
-        self.message({'req': args})
+        self.message({'req': fhash})
 
     def addfile(self, path):
-        return(dtrm.addfile(path))
+        s = dtrm.addfile(path)
+        dtrm.refresh()
+        return(s)
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)
