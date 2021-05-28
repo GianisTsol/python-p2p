@@ -1,3 +1,5 @@
+[![build](https://github.com/GianisTsol/python-p2p/actions/workflows/python-package.yml/badge.svg)](https://github.com/GianisTsol/python-p2p/actions/workflows/python-package.yml)
+
 # python-p2p
 
 A totaly decentralized python peer to peer network.
