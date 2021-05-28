@@ -6,7 +6,7 @@ fhash = ""
 
 
 node0 = node.Node("", 65434, 65436)
-node1 = node.Node("", 65435, 65436)
+node1 = node.Node("", 65435, 65437)
 
 node0.start()
 node1.start()
