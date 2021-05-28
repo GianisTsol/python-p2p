@@ -248,9 +248,9 @@ class Node(threading.Thread):
         print("Node stopped")
 
     def ConnectToNodes(self):
-        for i in peers:
-            if not node.connect_to(i, PORT):
-                del peers[peers.index(i)] #delete wrong / own ip from peers
+        for i in self.peers:
+            if not self.connect_to(i, PORT):
+                del self.peers[self.peers.index(i)] #delete wrong / own ip from peers
 
     def message(self, dict, ex=[]):
         #time that the message was sent
@@ -270,8 +270,7 @@ class Node(threading.Thread):
         self.message({'req': fhash})
 
     def send_peers(self):
-        global peers
-        buf = {'peers': peers}
+        buf = {'peers': self.peers}
         self.message(buf)
         return
 
@@ -283,11 +282,11 @@ class Node(threading.Thread):
                 if i not in self.peers and i != "" and i != self.ip:
                     self.peers.append(i)
 
-            self.debug_print("Known Peers: " + str(peers))
-            ConnectToNodes() # cpnnect to new nodes
+            self.debug_print("Known Peers: " + str(self.peers))
+            self.ConnectToNodes() # cpnnect to new nodes
             return
         if "msg" in dta and "time" in dta:
-            sth = dta['msg'] + str(dta['time'])
+            sth = str(dta['msg']) + str(dta['time'])
             hash_object = hashlib.md5(sth.encode("utf-8"))
             msghash = str(hash_object.hexdigest())
             print(msghash)
@@ -306,7 +305,7 @@ class Node(threading.Thread):
                 #if message is expired
                 self.debug_print("expired:" + dta['msg'])
 
-            if len(msgs) > len(peers) * 20:
+            if len(self.msgs) > len(self.peers) * 20:
                 for i in self.msgs:
                     if time.time() - self.msgs[i] > msg_del_time:
                         del self.msgs[i]
@@ -340,10 +339,9 @@ class Node(threading.Thread):
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)
-        print(other.host)
         if node.host not in self.peers:
             self.peers.append(node.host)
-        send_peers()
+        self.send_peers()
 
     def node_disconnected(self, node):
         self.debug_print("node_disconnected: " + node.id)
@@ -352,7 +350,7 @@ class Node(threading.Thread):
 
 
     def node_message(self, node, data):
-        self.data_handler(data, [node.host, self.ip])
+        self.data_handler(json.loads(data), [node.host, self.ip])
 
 class Pinger(threading.Thread):
     def __init__(self, parent):
@@ -375,7 +373,7 @@ class Pinger(threading.Thread):
 if __name__ == "__main__":
     new = Node("", PORT, FILE_PORT) # start the node
     new.start()
-
+    print("RUNNING IN CONSOLE MODE")
     time.sleep(1)
     try:
         while True:
