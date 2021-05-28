@@ -311,14 +311,14 @@ class Node(threading.Thread):
                         del self.msgs[i]
         if "req" in dta:
             if dtrm.have_file(dta['req']):
-                message({"resp": dta['req'], "ip": self.ip, "localip": self.local_ip})
+                self.message({"resp": dta['req'], "ip": self.ip, "localip": self.local_ip})
                 self.debug_print("recieved request for file: " + dta['req'] + " and we have it.")
             else:
                 self.debug_print("recieved request for file: " + dta['req'] + " but we do not have it.")
 
         if "resp" in dta and "snid" in dta and "ip" in dta:
             self.debug_print("node: " + dta['snid']+" has file " + dta['resp'])
-            if dta['resp'] in requested:
+            if dta['resp'] in self.requested:
                 print("node " + dta['snid'] + " has our file!")
                 if dta['ip'] == "":
                     if dta['localip'] != '':
