@@ -26,7 +26,7 @@ You can import the module after installing by:
 Firstly you need to extend the Node class and initialize the node:
 ```
   class Mynode(pythonp2p.Node):
-    def on_message(message):
+    def on_message(self, message):
       # Gets called everytime there is a new message
   node = Mynode()
   node.start()
