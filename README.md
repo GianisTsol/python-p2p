@@ -53,6 +53,13 @@ To send data to the network you can do:
 
 `data`: a variable to be sent to all other nodes. It is recommended to use a dictionary for consistancy.
 
+To receive messages simply extend the Node class:
+  class Mynode(Node):
+    def on_message(message):
+      # Gets called everytime there is a new message
+  node = Mynode()
+  node.start()
+
 ### Files
 
 `node.setfiledir(path)` sets the directory in which files downloaded from the net will be stored.

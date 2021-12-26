@@ -386,7 +386,7 @@ class Node(threading.Thread):
             return True
 
         if type == "msg":
-            self.debug_print("Incomig Message: " + data)
+            self.on_message(data)
 
         if type == "req":
             if dtrm.have_file(data):
@@ -418,6 +418,9 @@ class Node(threading.Thread):
                 )
                 downloader.start()
                 downloader.join()
+
+    def on_message(self, data):
+        self.debug_print("Incomig Message: " + data)
 
     def loadstate(self, file="state.json"):
         with open(file, "r") as f:
