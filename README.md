@@ -23,9 +23,14 @@ You can import the module after installing by:
 `import pythonp2p`
 
 ### Start
-Firstly you need to initialize the node and then start it:
-  node = pythonp2p.Node()
+Firstly you need to extend the Node class and initialize the node:
+```
+  class Mynode(pythonp2p.Node):
+    def on_message(message):
+      # Gets called everytime there is a new message
+  node = Mynode()
   node.start()
+```
 
 Advanced arguments:
 `host`: The host where the socket run on. Default is "". Dont touch this if you dont have a weird network config.
@@ -52,13 +57,6 @@ To send data to the network you can do:
 `node.send_message(data)`
 
 `data`: a variable to be sent to all other nodes. It is recommended to use a dictionary for consistancy.
-
-To receive messages simply extend the Node class:
-  class Mynode(Node):
-    def on_message(message):
-      # Gets called everytime there is a new message
-  node = Mynode()
-  node.start()
 
 ### Files
 
