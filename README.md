@@ -36,8 +36,14 @@ Advanced arguments:
 To connect to a another node do:
 `node.connect_to(ip)`
 
-`ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to.
-This is automatic.
+  `ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to.
+  This is automatic.
+
+`node.savestate()` save curent peers to a file.
+  `file`: optional arg filename to save state to, default: state.json
+
+`node.loadstate()` connect to previously discovered peers.
+  `file`: optional arg filename to save state to, default: state.json
 
 Note: You can also specify a `port` but it is not recommended since all of the network must run on the same port.
 

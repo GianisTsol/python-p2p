@@ -20,6 +20,8 @@ if __name__ == "__main__":
                 add
                 peers
                 req
+                load
+                save
                 """
                 )
             if "connect " in cmd:
@@ -42,6 +44,12 @@ if __name__ == "__main__":
             if cmd == "exit":
                 new.stop()
                 exit(0)
+
+            if cmd == "load":
+                new.loadstate()
+
+            if cmd == "save":
+                new.savestate()
 
             if cmd == "refresh":
                 dtrm.refresh()

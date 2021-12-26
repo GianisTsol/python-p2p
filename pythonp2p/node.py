@@ -419,6 +419,16 @@ class Node(threading.Thread):
                 downloader.start()
                 downloader.join()
 
+    def loadstate(self, file="state.json"):
+        with open(file, "r") as f:
+            peers = json.load(f)
+        for i in peers:
+            self.connect_to(i)
+
+    def savestate(self, file="state.json"):
+        with open(file, "w+") as f:
+            json.dump(self.peers, f)
+
     def requestFile(self, fhash):
         if fhash not in self.requested and fhash not in dtrm.getallfiles():
             self.requested.append(fhash)

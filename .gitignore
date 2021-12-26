@@ -3,3 +3,4 @@ ___pycache___
 content/*
 !content/test.txt
 test.py
+state.json
