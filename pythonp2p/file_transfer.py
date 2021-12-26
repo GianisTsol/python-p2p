@@ -22,8 +22,8 @@ class fileClientThread(threading.Thread):
             print("File requested to download but we do not have: " + filehash)
             self.sock.close()
         else:
-            file = content[filehash].name
-            filep = content[filehash].path + file
+            file = content[filehash]["name"]
+            filep = content[filehash]["path"]
             with open(filep, "rb") as f:
                 data = f.read()
             serialized_data = pickle.dumps(data)
@@ -129,9 +129,7 @@ class FileDownloader(threading.Thread):
             time.sleep(0.1)
             received_payload = b""
             reamining_payload_size = self.data_size
-            while (
-                reamining_payload_size != 0 and not self.terminate_flag.is_set()
-            ):
+            while reamining_payload_size != 0 and not self.terminate_flag.is_set():
                 received_payload += self.conn.recv(reamining_payload_size)
                 reamining_payload_size = self.data_size - len(received_payload)
             data = pickle.loads(received_payload)

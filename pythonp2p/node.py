@@ -117,9 +117,7 @@ class NodeConnection(threading.Thread):
         self.main_node.node_disconnected(self)
         self.sock.settimeout(None)
         self.sock.close()
-        del self.main_node.nodes_connected[
-            self.main_node.nodes_connected.index(self)
-        ]
+        del self.main_node.nodes_connected[self.main_node.nodes_connected.index(self)]
         time.sleep(1)
 
 
@@ -158,9 +156,7 @@ class Node(threading.Thread):
 
         self.local_ip = socket.gethostbyname(hostname)
 
-        portforwardlib.forwardPort(
-            port, port, None, None, False, "TCP", 0, "", True
-        )
+        portforwardlib.forwardPort(port, port, None, None, False, "TCP", 0, "", True)
         portforwardlib.forwardPort(
             file_port, file_port, None, None, False, "TCP", 0, "", True
         )
@@ -214,7 +210,9 @@ class Node(threading.Thread):
 
             if self.id == connected_node_id:
                 self.debug_print("own ip: " + host)
-                self.ip = host  # set our own ip - this canbug if two nodes have the same id
+                self.ip = (
+                    host  # set our own ip - this canbug if two nodes have the same id
+                )
                 sock.close()
                 return False
 
@@ -312,9 +310,7 @@ class Node(threading.Thread):
     def ConnectToNodes(self):
         for i in self.peers:
             if not self.connect_to(i, PORT):
-                del self.peers[
-                    self.peers.index(i)
-                ]  # delete wrong / own ip from peers
+                del self.peers[self.peers.index(i)]  # delete wrong / own ip from peers
 
     def send_message(self, data):
         # time that the message was sent
@@ -404,9 +400,7 @@ class Node(threading.Thread):
                 )
             else:
                 self.debug_print(
-                    "recieved request for file: "
-                    + data
-                    + " but we do not have it."
+                    "recieved request for file: " + data + " but we do not have it."
                 )
 
         if type == "resp":
@@ -420,14 +414,15 @@ class Node(threading.Thread):
                     ip = dta["ip"]
 
                 downloader = FileDownloader(
-                    ip, FILE_PORT, str(data), self.fileserver.dirname
+                    ip, FILE_PORT, str(data), self.fileServer.dirname
                 )
                 downloader.start()
                 downloader.join()
 
     def requestFile(self, fhash):
-        self.requested.append(fhash)
-        self.message("req", fhash)
+        if fhash not in self.requested and fhash not in dtrm.getallfiles():
+            self.requested.append(fhash)
+            self.message("req", fhash)
 
     def addfile(self, path):
         s = dtrm.addfile(path)
@@ -435,7 +430,7 @@ class Node(threading.Thread):
         return s
 
     def setfiledir(self, path):
-        self.fileserver.dirname = path
+        self.fileServer.dirname = path
         self.dtrm.download_path = path
 
     def node_connected(self, node):

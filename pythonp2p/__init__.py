@@ -1,5 +1,5 @@
-__title__ = 'python-p2p'
-__author__ = 'GianisTsol'
+__title__ = "python-p2p"
+__author__ = "GianisTsol"
 __license__ = "GNU 3.0"
 __main__ = "pythonp2p"
 

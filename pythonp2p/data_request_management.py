@@ -28,12 +28,8 @@ def refresh():
     for i in list(files):
         if files[i]["path"] != None:
             if not os.path.exists(files[i]["path"]):
-                print(
-                    "Removing file that no longer exists: "
-                    + str(files[i]["path"])
-                )
+                print("Removing file that no longer exists: " + str(files[i]["path"]))
                 del files[i]
-    print(files)
 
 
 def addfile(path):
