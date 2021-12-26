@@ -24,8 +24,8 @@ You can import the module after installing by:
 
 ### Start
 Firstly you need to initialize the node and then start it:
-`node = pythonp2p.Node()
-node.start()`
+  node = pythonp2p.Node()
+  node.start()
 
 Advanced arguments:
 `host`: The host where the socket run on. Default is "". Dont touch this if you dont have a weird network config.
@@ -43,21 +43,22 @@ Note: You can also specify a `port` but it is not recommended since all of the n
 
 ### Communication
 To send data to the network you can do:
-`node.message(data)`
+`node.send_message(data)`
 
-`data`: a dictionary to be sent to all other nodes. Please do not use `time`, `snid`, `req`, `resp` and `peers` as
-dict keys as they are used by the network internally. You can use `msg` as a key to send strings. There is message filtering.
+`data`: a variable to be sent to all other nodes. It is recommended to use a dictionary for consistancy.
 
 ### Files
 
-`node.addfile(path)` or `pythonp2p.files.addfile(path)`: Adds a file to the node so ith can be requested by others.
+`node.setfiledir(path)` sets the directory in which files downloaded from the net will be stored.
 
-`path`: The absolute path of the file in the computer.
-This function returns the hash which can be used by other nodes to request the file.
+`node.addfile(path)` or `pythonp2p.files.addfile(path)`: Adds a file to the node so it can be requested by others.
+
+  `path`: The absolute path of the file in the computer.
+  This function returns the hash which can be used by other nodes to request the file.
 
 `node.requestFile(filehash)`: Send a request to the network and if the file is available, download it.
 
-`filehash`: The hash of the file to request in string format. Look above on `addfile` to get that.
+  `filehash`: The hash of the file to request in string format. Look above on `addfile` to get that.
 
 
 ## Commands
@@ -67,15 +68,15 @@ If running node.py directly you will need this.
 - `add` - adds a file by path to be downloaded by other node.
 - `refresh` - refresh all files in content/ directory and get their hashes to share wit ohers. This hash is used above.
 - `peers` - Get a list of known peers and connected peers. Also their last ping.
-- `connect` - The most importsnt command. Use `connect [someip]` to connect to a node and join the network.
+- `connect` - The most important command. Use `connect someip` to connect to a node and join the network.
 - `debug` - Toggles debug mode. I suggest you leave this on to debug issues.
-- `exit` - Stop all threadsand exit.
+- `exit` - Stop all threads and exit.
 
 # Features
 
 - When a node connects no another it will recieve a list of active node to connect to.
 - Deticated file downloader and servr. When a node requests a file by its hash it will connect
-to a node that has it and download it. Files can be shared by placing the in the `content/` directory and the
+to a node that has it and download it. Files can be shared by placing them in a specified directory and
 will be detectd with a refresh. This can be expanded to become like torrents.
 - Peer discovery. Every node gets a list of neighbours when connected.
 - Messages run he entire network, so every node can get every info out there.
