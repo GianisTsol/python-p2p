@@ -1,15 +1,13 @@
 import threading
-import uuid
 import socket
 import json
-import pickle
 import sys
 import time
-import random
 import hashlib
 from . import data_request_management as dtrm
 from .file_transfer import FileDownloader, fileServer
 from . import portforwardlib
+from . import crypto_funcs as cf
 
 msg_del_time = 30
 PORT = 65432
@@ -31,13 +29,7 @@ class NodeConnection(threading.Thread):
         self.buffer = ""
 
         # The id of the connected node
-        self.id = id
-
-        try:
-            uuid.UUID(str(self.id))
-        except ValueError:
-            self.stop()
-            return False
+        self.id = cf.load_key(id)
 
         self.main_node.debug_print(
             "NodeConnection.send: Started with client ("
@@ -148,7 +140,7 @@ class Node(threading.Thread):
         self.msgs = {}  # hashes of recieved messages
         self.peers = []
 
-        self.id = str(uuid.uuid4())
+        self.id, self.private_key = cf.generate_keys()
 
         self.max_peers = 10
 
@@ -163,13 +155,7 @@ class Node(threading.Thread):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print(
-            "Initialisation of the Node on port: "
-            + str(self.port)
-            + " on node ("
-            + self.id
-            + ")"
-        )
+        print("Initialisation of the Node on port: " + str(self.port))
         self.sock.bind((self.host, self.port))
         self.sock.settimeout(10.0)
         self.sock.listen(1)
@@ -266,7 +252,7 @@ class Node(threading.Thread):
             try:
                 connection, client_address = self.sock.accept()
 
-                connected_node_id = str(connection.recv(128).decode("utf-8"))
+                connected_node_id = str(connection.recv(2048).decode("utf-8"))
                 connection.send(self.id.encode("utf-8"))
 
                 if self.id != connected_node_id:
@@ -326,6 +312,9 @@ class Node(threading.Thread):
             # sender node id
             dict["snid"] = str(self.id)
 
+        if "sig" not in dict:
+            dict["sig"] = cf.sign(data, self.private_key)
+
         dict = {**dict, **overides}
         self.network_send(dict, ex)
 
@@ -333,8 +322,11 @@ class Node(threading.Thread):
         self.message("peers", self.peers)
 
     def check_validity(self, msg):
-        if "time" in msg and "type" in msg and "snid" in msg:
+        if "time" in msg and "type" in msg and "snid" in msg and "sig" in msg:
             return True
+
+        if not self.verify(msg["data"], msg["sig"], msg["snid"]):
+            return False
 
         if msg["type"] == "resp":
             if "ip" not in msg and "localip" not in msg:
