@@ -1,12 +1,10 @@
 from .node import *
-import os
 
 if __name__ == "__main__":
     new = Node("", PORT, FILE_PORT)  # start the node
     new.start()
     print("RUNNING IN CONSOLE MODE")
     time.sleep(1)
-    new.setfiledir(os.getcwd())
     try:
         while True:
             cmd = input("PYTHONP2P>")
