@@ -29,8 +29,8 @@ class NodeConnection(threading.Thread):
         self.buffer = ""
 
         # The id of the connected node
-        self.main_node.debug_print(id)
-        self.id = cf.load_key(id)
+        self.public_key = cf.load_key(id)
+        self.id = id
 
         self.main_node.debug_print(
             "NodeConnection.send: Started with client ("
@@ -194,7 +194,7 @@ class Node(threading.Thread):
             sock.connect((host, port))
 
             sock.send(self.id.encode("utf-8"))
-            connected_node_id = str(sock.recv(128).decode("utf-8"))
+            connected_node_id = sock.recv(1024).decode("utf-8")
 
             if self.id == connected_node_id:
                 self.debug_print("own ip: " + host)
@@ -204,11 +204,11 @@ class Node(threading.Thread):
                 sock.close()
                 return False
 
+            print("AAAAAAAa")
             thread_client = self.create_new_connection(
                 sock, connected_node_id, host, port
             )
             thread_client.start()
-
             self.nodes_connected.append(thread_client)
             self.node_connected(thread_client)
 
@@ -254,7 +254,7 @@ class Node(threading.Thread):
             try:
                 connection, client_address = self.sock.accept()
 
-                connected_node_id = str(connection.recv(2048).decode("utf-8"))
+                connected_node_id = connection.recv(2048).decode("utf-8")
                 connection.send(self.id.encode("utf-8"))
 
                 if self.id != connected_node_id:
