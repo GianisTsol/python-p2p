@@ -436,7 +436,7 @@ class Node(threading.Thread):
 
     def setfiledir(self, path):
         self.fileServer.dirname = path
-        self.dtrm.download_path = path
+        dtrm.download_path = path
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)
