@@ -145,3 +145,4 @@ class FileDownloader(threading.Thread):
         except Exception as e:
             print("File Downloader: Server errored or timed out.")
             # raise(e)
+            self.stop()

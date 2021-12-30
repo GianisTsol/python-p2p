@@ -204,7 +204,6 @@ class Node(threading.Thread):
                 sock.close()
                 return False
 
-            print("AAAAAAAa")
             thread_client = self.create_new_connection(
                 sock, connected_node_id, host, port
             )
@@ -411,7 +410,6 @@ class Node(threading.Thread):
                     ip, FILE_PORT, str(data), self.fileServer.dirname
                 )
                 downloader.start()
-                downloader.join()
 
     def on_message(self, data):
         self.debug_print("Incomig Message: " + data)
