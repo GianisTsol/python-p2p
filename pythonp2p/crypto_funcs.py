@@ -20,7 +20,7 @@ def sign(message, private_key):
 
 
 def load_key(key):
-    return RSA.import_key(key)
+    return RSA.importKey(key)
 
 
 def verify(message, key, sig):
