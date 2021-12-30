@@ -29,10 +29,8 @@ class NodeConnection(threading.Thread):
         self.buffer = ""
 
         # The id of the connected node
-        try:
-            self.id = cf.load_key(id)
-        except:
-            self.stop()
+        self.main_node.debug_print(id)
+        self.id = cf.load_key(id)
 
         self.main_node.debug_print(
             "NodeConnection.send: Started with client ("
@@ -144,7 +142,7 @@ class Node(threading.Thread):
         self.peers = []
 
         self.publickey, self.private_key = cf.generate_keys()
-        self.id = str(self.publickey.exportKey("PEM"))
+        self.id = cf.serialize_key(self.publickey)
 
         self.max_peers = 10
 

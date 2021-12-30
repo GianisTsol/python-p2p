@@ -1,6 +1,7 @@
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
+import base64
 
 
 def generate_keys():
@@ -20,7 +21,13 @@ def sign(message, private_key):
 
 
 def load_key(key):
-    return RSA.import_key(key)
+    key = base64.b64decode(key)
+    return RSA.importKey(key)
+
+
+def serialize_key(key):
+    key = key.exportKey("PEM")
+    return base64.b64encode(key)
 
 
 def verify(message, key, sig):
