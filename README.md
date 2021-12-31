@@ -49,17 +49,26 @@ Note: You can also specify a `port` but it is not recommended since all of the n
 
 ### Communication
 To send data to the network you can do:
-`node.send_message(data)`
+`node.send_message(data, receiver=None)`
 
-`data`: a variable to be sent to all other nodes. It is recommended to use a dictionary for consistancy.
+`data`: a variable to be sent to all other nodes.
+`receiver`: a string representing the id/public key of the node the message is for.
+  If specified the message will be encrypted and only that node will be able to receive and read it.
 
-To receive messages simply extend the Node class:
-  class Mynode(Node):
-    def on_message(message):
-      # Gets called everytime there is a new message
-  node = Mynode()
-  node.start()
 
+  To receive messages simply extend the Node class:
+    class Mynode(Node):
+      def on_message(message, sender, private):
+        # Gets called everytime there is a new message
+    node = Mynode()
+    node.start()
+
+  `message`: variable sent from other node.
+  `sender`: a string representing the id/public key of the node that snt the message.
+  `private`: bool representing if the message was encrypted and meant only for this node or public.
+
+  #### Other node properties:
+    node.id : unique string identifying the node to the network, used to receive private messages.
 ### Files
 
 `node.setfiledir(path)` sets the directory in which files downloaded from the net will be stored.

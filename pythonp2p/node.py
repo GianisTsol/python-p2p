@@ -405,7 +405,7 @@ class Node(threading.Thread):
             return True
 
         if type == "msg":
-            self.on_message(data)
+            self.on_message(data, dta["snid"], bool(dta["rnid"]))
 
         if type == "req":
             if dtrm.have_file(data):
@@ -449,7 +449,7 @@ class Node(threading.Thread):
         else:
             return False
 
-    def on_message(self, data):
+    def on_message(self, data, sender, private):
         self.debug_print("Incomig Message: " + data)
 
     def loadstate(self, file="state.json"):
