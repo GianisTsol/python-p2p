@@ -1,9 +1,14 @@
-import json
 import hashlib
 import os
 
 files = {}
 download_path = ""
+
+
+def hash_data(data):
+    hasher = hashlib.md5()
+    hasher.update(data)
+    return str(hasher.hexdigest())
 
 
 def hashFile(filepath):
@@ -20,11 +25,6 @@ def hashFile(filepath):
 
 
 def refresh():
-    f = []
-    for (dirpath, dirnames, filenames) in os.walk(download_path):
-        f.extend(filenames)
-        for file in filenames:
-            addfile(download_path + file)
     for i in list(files):
         if files[i]["path"] != None:
             if not os.path.exists(files[i]["path"]):
@@ -46,4 +46,5 @@ def have_file(hash):
 
 
 def getallfiles():
+    refresh()
     return files

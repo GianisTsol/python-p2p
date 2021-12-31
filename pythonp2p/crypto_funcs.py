@@ -11,13 +11,12 @@ def generate_keys():
     return public_key, private_key
 
 
-def sign(message, private_key):
-    digest = SHA256.new()
-    digest.update(str(message).encode("utf-8"))
-    signer = PKCS1_v1_5.new(private_key)
-    sig = signer.sign(digest)
+def encrypt(message, key):
+    return key.encrypt(message)
 
-    return str(base64.b64encode(sig))
+
+def decrypt(message, key):
+    return key.decrypt(message)
 
 
 def load_key(key):
@@ -30,7 +29,16 @@ def serialize_key(key):
     return key
 
 
-def verify(message, key, sig):
+def sign(message, private_key):
+    digest = SHA256.new()
+    digest.update(str(message).encode("utf-8"))
+    signer = PKCS1_v1_5.new(private_key)
+    sig = signer.sign(digest)
+
+    return base64.b64encode(sig).decode("utf-8")
+
+
+def verify(message, sig, key):
     digest = SHA256.new()
     digest.update(str(message).encode("utf-8"))
     verifier = PKCS1_v1_5.new(key)
