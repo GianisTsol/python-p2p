@@ -23,9 +23,13 @@ def test_node_connect():
 
 
 def test_node_message():
-    node0.message("msg", "node test")
+    node0.send_message("node test")
     assert len(node1.msgs.keys()) == 1
     assert len(node0.msgs.keys()) == 1
+
+
+def test_node_private_message():
+    node0.send_message("TEST MESSAGE", reciever=node1.id)
 
 
 def test_files_add():

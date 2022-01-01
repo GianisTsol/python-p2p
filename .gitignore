@@ -4,3 +4,6 @@ content/*
 !content/test.txt
 test.py
 state.json
+build/
+dist/
+pythonp2p.egg-info/

@@ -4,10 +4,9 @@ if __name__ == "__main__":
     new = Node("", PORT, FILE_PORT)  # start the node
     new.start()
     print("RUNNING IN CONSOLE MODE")
-    time.sleep(1)
     try:
         while True:
-            cmd = input(">")
+            cmd = input("PYTHONP2P>")
             if cmd == "help":
                 print(
                     """
@@ -59,7 +58,7 @@ if __name__ == "__main__":
                 args = cmd.replace("add ", "")
                 print("Adding file: " + args)
                 try:
-                    dtrm.addfile(args)
+                    print(dtrm.addfile(args))
                     dtrm.refresh()
                 except Exception as e:
                     print(e)

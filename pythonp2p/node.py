@@ -1,15 +1,14 @@
 import threading
-import uuid
 import socket
 import json
-import pickle
 import sys
 import time
-import random
 import hashlib
 from . import data_request_management as dtrm
 from .file_transfer import FileDownloader, fileServer
 from . import portforwardlib
+from . import crypto_funcs as cf
+import ipaddress
 
 msg_del_time = 30
 PORT = 65432
@@ -31,13 +30,8 @@ class NodeConnection(threading.Thread):
         self.buffer = ""
 
         # The id of the connected node
+        self.public_key = cf.load_key(id)
         self.id = id
-
-        try:
-            uuid.UUID(str(self.id))
-        except ValueError:
-            self.stop()
-            return False
 
         self.main_node.debug_print(
             "NodeConnection.send: Started with client ("
@@ -134,7 +128,7 @@ class Node(threading.Thread):
         self.debug = True
 
         self.dead_time = (
-            30  # time to disconect from node if not pinged, nodes ping after 20s
+            45  # time to disconect from node if not pinged, nodes ping after 20s
         )
 
         self.host = host
@@ -148,7 +142,8 @@ class Node(threading.Thread):
         self.msgs = {}  # hashes of recieved messages
         self.peers = []
 
-        self.id = str(uuid.uuid4())
+        self.publickey, self.private_key = cf.generate_keys()
+        self.id = cf.serialize_key(self.publickey)
 
         self.max_peers = 10
 
@@ -156,6 +151,7 @@ class Node(threading.Thread):
 
         self.local_ip = socket.gethostbyname(hostname)
 
+        self.banned = []
         portforwardlib.forwardPort(port, port, None, None, False, "TCP", 0, "", True)
         portforwardlib.forwardPort(
             file_port, file_port, None, None, False, "TCP", 0, "", True
@@ -163,13 +159,7 @@ class Node(threading.Thread):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print(
-            "Initialisation of the Node on port: "
-            + str(self.port)
-            + " on node ("
-            + self.id
-            + ")"
-        )
+        print("Initialisation of the Node on port: " + str(self.port))
         self.sock.bind((self.host, self.port))
         self.sock.settimeout(10.0)
         self.sock.listen(1)
@@ -187,8 +177,8 @@ class Node(threading.Thread):
 
     def connect_to(self, host, port=PORT):
 
-        if host == self.ip or host == "" or host == self.local_ip:
-            self.debug_print("connect_to: Cannot connect with yourself!!")
+        if not self.check_ip_to_connect(host):
+            self.debug_print("connect_to: Cannot connect!!")
             return False
 
         if len(self.nodes_connected) >= self.max_peers:
@@ -206,13 +196,15 @@ class Node(threading.Thread):
             sock.connect((host, port))
 
             sock.send(self.id.encode("utf-8"))
-            connected_node_id = str(sock.recv(128).decode("utf-8"))
+            connected_node_id = sock.recv(1024).decode("utf-8")
 
             if self.id == connected_node_id:
-                self.debug_print("own ip: " + host)
-                self.ip = (
-                    host  # set our own ip - this canbug if two nodes have the same id
-                )
+                self.debug_print("Possible own ip: " + host)
+                if ipaddress.ip_address(host).is_private:
+                    self.local_ip = host
+                else:
+                    self.ip = host
+                self.banned.append(host)
                 sock.close()
                 return False
 
@@ -220,7 +212,6 @@ class Node(threading.Thread):
                 sock, connected_node_id, host, port
             )
             thread_client.start()
-
             self.nodes_connected.append(thread_client)
             self.node_connected(thread_client)
 
@@ -266,7 +257,7 @@ class Node(threading.Thread):
             try:
                 connection, client_address = self.sock.accept()
 
-                connected_node_id = str(connection.recv(128).decode("utf-8"))
+                connected_node_id = connection.recv(2048).decode("utf-8")
                 connection.send(self.id.encode("utf-8"))
 
                 if self.id != connected_node_id:
@@ -298,12 +289,6 @@ class Node(threading.Thread):
         for t in self.nodes_connected:
             t.stop()
 
-        time.sleep(0.5)
-        self.pinger.join()
-        self.fileServer.join()
-        for t in self.nodes_connected:
-            t.join()
-
         self.sock.close()
         print("Node stopped")
 
@@ -312,9 +297,11 @@ class Node(threading.Thread):
             if not self.connect_to(i, PORT):
                 del self.peers[self.peers.index(i)]  # delete wrong / own ip from peers
 
-    def send_message(self, data):
+    def send_message(self, data, reciever=None):
         # time that the message was sent
-        self.message("msg", data)
+        if reciever:
+            data = cf.encrypt(data, cf.load_key(reciever))
+        self.message("msg", data, {"rnid": reciever})
 
     def message(self, type, data, overides={}, ex=[]):
         # time that the message was sent
@@ -326,6 +313,13 @@ class Node(threading.Thread):
             # sender node id
             dict["snid"] = str(self.id)
 
+        if "rnid" not in dict:
+            # reciever node id
+            dict["rnid"] = None
+
+        if "sig" not in dict:
+            dict["sig"] = cf.sign(data, self.private_key)
+
         dict = {**dict, **overides}
         self.network_send(dict, ex)
 
@@ -333,13 +327,25 @@ class Node(threading.Thread):
         self.message("peers", self.peers)
 
     def check_validity(self, msg):
-        if "time" in msg and "type" in msg and "snid" in msg:
-            return True
+        if not (
+            "time" in msg
+            and "type" in msg
+            and "snid" in msg
+            and "sig" in msg
+            and "rnid" in msg
+        ):
+            return False
+
+        if not cf.verify(msg["data"], msg["sig"], cf.load_key(msg["snid"])):
+            self.debug_print(
+                f"Error validating signature of message from {msg['snid']}"
+            )
+            return False
 
         if msg["type"] == "resp":
             if "ip" not in msg and "localip" not in msg:
                 return False
-        return False
+        return True
 
     def check_expired(self, dta):
         sth = str(dta)
@@ -363,6 +369,15 @@ class Node(threading.Thread):
                 if time.time() - self.msgs[i] > msg_del_time:
                     del self.msgs[i]
 
+    def encryption_handler(self, dta):
+        if dta["rnid"] == self.id:
+            dta["data"] = cf.decrypt(dta["data"], self.private_key)
+            return dta
+        elif dta["rnid"] is None:
+            return dta
+        else:
+            return False
+
     def data_handler(self, dta, n):
         if not self.check_validity(dta):
             return False
@@ -372,13 +387,17 @@ class Node(threading.Thread):
         else:
             self.announce(dta, n)
 
+        dta = self.encryption_handler(dta)
+        if not dta:
+            return False
+
         type = dta["type"]
         data = dta["data"]
 
         if type == "peers":
             # peers handling
             for i in data:
-                if i not in self.peers and i != "" and i != self.ip:
+                if self.check_ip_to_connect(i):
                     self.peers.append(i)
 
             self.debug_print("Known Peers: " + str(self.peers))
@@ -386,7 +405,7 @@ class Node(threading.Thread):
             return True
 
         if type == "msg":
-            self.on_message(data)
+            self.on_message(data, dta["snid"], bool(dta["rnid"]))
 
         if type == "req":
             if dtrm.have_file(data):
@@ -417,9 +436,20 @@ class Node(threading.Thread):
                     ip, FILE_PORT, str(data), self.fileServer.dirname
                 )
                 downloader.start()
-                downloader.join()
 
-    def on_message(self, data):
+    def check_ip_to_connect(self, ip):
+        if (
+            ip not in self.peers
+            and ip != ""
+            and ip != self.ip
+            and ip != self.local_ip
+            and ip not in self.banned
+        ):
+            return True
+        else:
+            return False
+
+    def on_message(self, data, sender, private):
         self.debug_print("Incomig Message: " + data)
 
     def loadstate(self, file="state.json"):
@@ -444,7 +474,7 @@ class Node(threading.Thread):
 
     def setfiledir(self, path):
         self.fileServer.dirname = path
-        self.dtrm.download_path = path
+        dtrm.download_path = path
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)

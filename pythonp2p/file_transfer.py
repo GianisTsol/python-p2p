@@ -138,10 +138,13 @@ class FileDownloader(threading.Thread):
 
             with open(self.dirnamme + self.filename, "wb") as f:
                 f.write(data)
-            dtrm.refresh()
+            if not dtrm.hash_data(self.dirnamme + self.filename) == self.fhash:
+                print("Recieved corrupt file, deleting....")
             self.finished = True
-            print("File Downloder Finished")
+            print("File Downlod Finished")
+            dtrm.addfile(self.dirnamme + self.filename)
 
         except Exception as e:
             print("File Downloader: Server errored or timed out.")
             # raise(e)
+            self.stop()
