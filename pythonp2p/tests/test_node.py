@@ -13,12 +13,9 @@ node1.start()
 
 node0.connect_to("127.0.0.1", 65435)
 
-time.sleep(1)
-
 
 def test_node_connect():
-    assert len(node1.peers) == 1
-    assert len(node0.peers) == 1
+    assert len(node0.nodes_connected) == 1
     assert len(node1.nodes_connected) == 1
 
 
@@ -34,14 +31,13 @@ def test_node_private_message():
 
 def test_files_add():
     global fhash
-    fhash = node0.addfile("./pythonp2p/content/test.txt")
+    fhash = node1.addfile("LICENSE")
 
 
 def test_file_request():
-    print("requesting file ... " + fhash)
-    node1.requestFile(fhash)
-    time.sleep(15)
-    assert len(node0.msgs.keys()) == 2
+    node0.requestFile(fhash)
+    print(node0.file_manager.getallfiles())
+    assert len(node0.requested) == 1
     assert len(node1.msgs.keys()) == 2
 
 

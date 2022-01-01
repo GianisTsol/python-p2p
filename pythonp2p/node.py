@@ -4,8 +4,7 @@ import json
 import sys
 import time
 import hashlib
-from . import data_request_management as dtrm
-from .file_transfer import FileDownloader, fileServer
+from .file_transfer import FileDownloader, fileServer, FileManager
 from . import portforwardlib
 from . import crypto_funcs as cf
 import ipaddress
@@ -117,14 +116,12 @@ class NodeConnection(threading.Thread):
 
 class Node(threading.Thread):
     def __init__(self, host="", port=65432, file_port=65433):
+        super(Node, self).__init__()
 
         self.terminate_flag = threading.Event()
-
         self.pinger = Pinger(self)  # start pinger
+        self.file_manager = FileManager()
         self.fileServer = fileServer(self, file_port)
-
-        super(Node, self).__init__()  # CAll Thread.__init__()
-
         self.debug = True
 
         self.dead_time = (
@@ -159,7 +156,7 @@ class Node(threading.Thread):
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print("Initialisation of the Node on port: " + str(self.port))
+        self.debug_print("Initialisation of the Node on port: " + str(self.port))
         self.sock.bind((self.host, self.port))
         self.sock.settimeout(10.0)
         self.sock.listen(1)
@@ -408,7 +405,7 @@ class Node(threading.Thread):
             self.on_message(data, dta["snid"], bool(dta["rnid"]))
 
         if type == "req":
-            if dtrm.have_file(data):
+            if self.file_manager.have_file(data):
                 self.message(
                     "resp",
                     data,
@@ -433,7 +430,7 @@ class Node(threading.Thread):
                     ip = dta["ip"]
 
                 downloader = FileDownloader(
-                    ip, FILE_PORT, str(data), self.fileServer.dirname
+                    ip, FILE_PORT, str(data), self.fileServer.dirname, self.file_manager
                 )
                 downloader.start()
 
@@ -463,18 +460,18 @@ class Node(threading.Thread):
             json.dump(self.peers, f)
 
     def requestFile(self, fhash):
-        if fhash not in self.requested and fhash not in dtrm.getallfiles():
+        if fhash not in self.requested and fhash not in self.file_manager.getallfiles():
             self.requested.append(fhash)
             self.message("req", fhash)
 
     def addfile(self, path):
-        s = dtrm.addfile(path)
-        dtrm.refresh()
+        s = self.file_manager.addfile(path)
+        self.file_manager.refresh()
         return s
 
     def setfiledir(self, path):
         self.fileServer.dirname = path
-        dtrm.download_path = path
+        self.file_manager.download_path = path
 
     def node_connected(self, node):
         self.debug_print("node_connected: " + node.id)

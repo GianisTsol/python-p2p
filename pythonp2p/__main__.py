@@ -51,15 +51,15 @@ if __name__ == "__main__":
                 new.savestate()
 
             if cmd == "refresh":
-                dtrm.refresh()
-                print(dtrm.files)
+                new.file_manager.refresh()
+                print(new.file_manager.files)
 
             if "add " in cmd:
                 args = cmd.replace("add ", "")
                 print("Adding file: " + args)
                 try:
-                    print(dtrm.addfile(args))
-                    dtrm.refresh()
+                    print(new.file_manager.addfile(args))
+                    new.file_manager.refresh()
                 except Exception as e:
                     print(e)
 

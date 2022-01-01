@@ -1,24 +1,74 @@
 import threading
 import socket
 import pickle
-from . import data_request_management as dtrm
 import time
 import struct
+import hashlib
+import os
+
+
+class FileManager(object):
+    def __init__(self):
+        self.files = {}
+        self.download_path = ""
+
+    def hash_data(self, data):
+        hasher = hashlib.md5()
+        hasher.update(data)
+        return str(hasher.hexdigest())
+
+    def hashFile(self, filepath):
+        hasher = hashlib.md5()
+        try:
+            with open(filepath, "rb") as afile:
+                buf = afile.read()
+                while len(buf) > 0:
+                    hasher.update(buf)
+                    buf = afile.read()
+            return hasher.hexdigest()
+        except:
+            print("Couldn't find/hash file " + filepath)
+
+    def refresh(self):
+        for i in list(self.files):
+            if self.files[i]["path"] is not None:
+                if not os.path.exists(self.files[i]["path"]):
+                    print(
+                        "Removing file that no longer exists: "
+                        + str(self.files[i]["path"])
+                    )
+                    del self.files[i]
+
+    def addfile(self, path):
+        name = os.path.basename(path)
+        h = self.hashFile(path)
+        self.files[h] = {"name": name, "path": path}
+        return str(h)
+
+    def have_file(self, hash):
+        self.refresh()
+        if hash in self.files:
+            return True
+
+    def getallfiles(self):
+        self.refresh()
+        return self.files
 
 
 class fileClientThread(threading.Thread):
-    def __init__(self, ip, port, conn, file_requested):
+    def __init__(self, ip, port, conn, file_requested, file_manager):
         super(fileClientThread, self).__init__()  # CAll Thread.__init__()
         self.terminate_flag = threading.Event()
         self.ip = ip
         self.port = port
         self.sock = conn
         self.file_requested = file_requested
+        self.file_manager = file_manager
 
     def SendFile(self, filehash):
-        content = dtrm.getallfiles()
+        content = self.file_manager.getallfiles()
         filehash = str(filehash)
-        if not dtrm.have_file(filehash):
+        if not self.file_manager.have_file(filehash):
             print("File requested to download but we do not have: " + filehash)
             self.sock.close()
         else:
@@ -50,6 +100,7 @@ class fileServer(threading.Thread):
 
         self.parent = parent
         self.port = PORT
+        self.file_manager = self.parent.file_manager
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -78,8 +129,10 @@ class fileServer(threading.Thread):
                     conn.recv(4096).decode("utf-8")
                 )  # recieve file hash
                 print("Sending file: " + file_requested)
-                newthread = fileClientThread(ip, port, conn, file_requested)
-                dtrm.refresh()
+                newthread = fileClientThread(
+                    ip, port, conn, file_requested, self.file_manager
+                )
+                self.file_manager.refresh()
                 newthread.start()
 
                 self.threads.append(newthread)
@@ -97,16 +150,20 @@ class fileServer(threading.Thread):
 
 
 class FileDownloader(threading.Thread):
-    def __init__(self, ip, port, fhash, dirname):
+    def __init__(self, ip, port, fhash, dirname, file_manager):
         super(FileDownloader, self).__init__()
         self.terminate_flag = threading.Event()
         self.fhash = str(fhash)
         self.dirnamme = dirname
+        self.file_manager = file_manager
         self.invalid_chars = ["/", "\\", "|", "*", "<", ">", ":", "?", '"']
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.settimeout(10.0)
-        self.conn.connect((ip, port))
-        print("File Downloder Started")
+        try:
+            self.conn.connect((ip, port))
+        except (ConnectionRefusedError, ConnectionError, ConnectionResetError):
+            print("Error connecting")
+            self.stop()
 
     def stop(self):
         self.terminate_flag.set()
@@ -138,11 +195,14 @@ class FileDownloader(threading.Thread):
 
             with open(self.dirnamme + self.filename, "wb") as f:
                 f.write(data)
-            if not dtrm.hash_data(self.dirnamme + self.filename) == self.fhash:
+            if (
+                not self.file_manager.hash_data(self.dirnamme + self.filename)
+                == self.fhash
+            ):
                 print("Recieved corrupt file, deleting....")
             self.finished = True
             print("File Downlod Finished")
-            dtrm.addfile(self.dirnamme + self.filename)
+            self.file_manager.addfile(self.dirnamme + self.filename)
 
         except Exception as e:
             print("File Downloader: Server errored or timed out.")

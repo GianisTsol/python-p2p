@@ -24,7 +24,7 @@ You can import the module after installing by:
 
 ## Start
 
-Firstly you need to initialize the node and then start it. Look at blelow at [Receiving Data](#ReceivingData) to learn how to extend he class first.
+Firstly you need to initialize the node and then start it. Look at blelow at [Receiving Data](#receiving-data) to learn how to extend he class first.
 
  #### Advanced arguments:
 

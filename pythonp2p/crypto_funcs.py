@@ -1,7 +1,9 @@
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
+from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 import base64
+import json
 
 
 def generate_keys():
@@ -12,11 +14,15 @@ def generate_keys():
 
 
 def encrypt(message, key):
-    return key.encrypt(message)
+    message = json.dumps(message).encode("utf-8")
+    cipher = PKCS1_OAEP.new(key)
+    return base64.b64encode(cipher.encrypt(message)).decode("utf-8")
 
 
 def decrypt(message, key):
-    return key.decrypt(message)
+    cipher = PKCS1_OAEP.new(key)
+    message = cipher.decrypt(base64.b64decode(message))
+    return json.loads(message)
 
 
 def load_key(key):
