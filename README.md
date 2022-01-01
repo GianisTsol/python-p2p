@@ -28,6 +28,7 @@ Firstly you need to initialize the node and then start it. Look at blelow at [Re
 
  #### Advanced arguments:
 
+
 `host`: The host where the socket run on. Default is "". Dont touch this if you dont have a weird network config.
 
 `port`: the port where the nodes communicate. Default 65432
@@ -69,6 +70,7 @@ To send data to the network you can do:
         # Gets called everytime there is a new message
     node = Mynode()
     node.start()
+
 
   `message`: variable sent from other node.
 
