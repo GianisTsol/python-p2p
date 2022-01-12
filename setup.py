@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "."},
+    package_dir={"pythonp2p": "."},
     packages=["pythonp2p"],
     python_requires=">=3.8",
 )
