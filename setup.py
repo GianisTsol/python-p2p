@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pythonp2p",
-    version="1.7.0",
+    version="1.7.1",
     author="GianisTsol",
     author_email="giannisetsolakis@gmail.com",
     description="A peer to peer network able to transfer data and files",
@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    package_dir={"pythonp2p": "."},
+    package_dir={"pythonp2p": "pythonp2p"},
     packages=["pythonp2p"],
     python_requires=">=3.8",
 )
