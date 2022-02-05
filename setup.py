@@ -22,5 +22,6 @@ setuptools.setup(
     ],
     package_dir={"pythonp2p": "pythonp2p"},
     packages=["pythonp2p"],
+    install_request=["pycryptodome"],
     python_requires=">=3.8",
 )
