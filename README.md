@@ -9,11 +9,11 @@ The code provides a simple network structure for information exchange between pe
 Using https://github.com/gryphius/port-forward for port forward by upnp.
 
 # Install
-note: tested on python 3.8+
+note: tested on python 3.9+
 
 To install the package do:
 ```
-python setup.py install
+pip install .
 ```
 
 # Implementing your own projects

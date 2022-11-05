@@ -7,3 +7,4 @@ state.json
 build/
 dist/
 pythonp2p.egg-info/
+.vscode

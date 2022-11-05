@@ -1,3 +1,24 @@
+[project]
+name="pythonp2p"
+version="1.7.1"
+description = "A peer to peer network able to transfer data and files"
+authors = [
+    { name = "GianisTsol" }
+]
+dependencies = [
+    "pycryptodome",
+]
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: OS Independent",
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+[tool.setuptools]
+packages = ["pythonp2p"]
+
 [build-system]
 requires = [
     "setuptools>=42",
