@@ -11,65 +11,88 @@ Using https://github.com/gryphius/port-forward for port forward by upnp.
 # Install
 note: tested on python 3.9+
 
-To install the package do:
+Install from pypi:
+```
+pip install pythonp2p
+```
+
+Install from source
 ```
 pip install .
 ```
 
-# Implementing your own projects
+# Usage
 
-### Import
-You can import the module after installing by:
-`import pythonp2p`
+#### Import
+```py
+from pythonp2p import Node
+```
 
-## Start
+#### Start
 
-Firstly you need to initialize the node and then start it. Look at blelow at [Receiving Data](#receiving-data) to learn how to extend he class first.
+ Firstly you need to initialize the node and then start it. Look at blelow at [Receiving Data](#receiving-data) to learn how to extend he class first.
 
- #### Advanced arguments:
-
-
-`host`: The host where the socket run on. Default is "". Dont touch this if you dont have a weird network config.
-
-`port`: the port where the nodes communicate. Default 65432
-
-`file_server_port`: the port which the server for file transfer is listening on. It is optional. Default 65433
+ ```py
+ node = Node(HOST, PORT, FILE_PORT)  # start the node
+ node.start()
+ ```
 
 
-## Connection
-To connect to a another node do:
-`node.connect_to(ip)`
+`HOST` (OPTIONAL): The host where the socket run on. Dont touch this if you dont have a weird network config. Default is "".
 
-  `ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to.
-  This is automatic.
-`port` : optional. default is the port the node is running on.
+`PORT` (OPTIONAL): the port where the nodes communicate. Default 65432
+
+`FILE_PORT` (OPTIONAL): the port which the server for file transfer is listening on. It is optional. Default 65433
 
 
-`Node.savestate(file)` save current peers to a file.
+#### Connection
 
-`Node.loadstate(file)` connect to previously discovered peers.
+```py
+node.connect_to(ip)
+```
 
-  `file`: optional arg filename to save/load state to/from, default: `state.json`
+`ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to. This is automatic.
 
-### Communication
- ### Sending data
-To send data to the network you can do:
-`node.send_message(data, receiver=None)`
 
-`data`: a variable to be sent to all other nodes.
+`port` (OPTIONAL): default is the port the node is running on.
+
+#### Saving state
+save current peers to a file.
+```py
+node.savestate(file)
+```
+
+connect to previously discovered peers.
+```py
+node.loadstate(file)
+```
+
+`file` (OPTIONAL): filename to save/load state to/from, default: `state.json`
+
+#### Communication
+To broadcast data to the network you can do:
+```py
+node.send_message(data, receiver=None)
+```
+
+`data`: dict to be sent to all other nodes.
 
 `receiver`: a string representing the id/public key of the node the message is for.
   If specified the message will be encrypted and only that node will be able to receive and read it.
 
- ### Receiving data
+
 
   To receive messages simply extend the Node class:
-
+ 
+ ```py
+    from pythonp2p import Node
+    
     class Mynode(Node):
       def on_message(message, sender, private):
         # Gets called everytime there is a new message
     node = Mynode()
     node.start()
+ ```
 
 
   `message`: variable sent from other node.
@@ -79,10 +102,11 @@ To send data to the network you can do:
   `private`: bool representing if the message was encrypted and meant only for this node or public.
 
 
-  ### Other node properties:
+#### node properties:
    `Node.id` : unique string identifying the node to the network, used to receive private messages.
 
-## Files
+
+#### Files
 
 `Node.setfiledir(path)` sets the directory in which files downloaded from the net will be stored.
 
@@ -96,7 +120,7 @@ To send data to the network you can do:
   `filehash`: The hash of the file to request in string format. Look above on `addfile` to get that.
 
 
-# Features
+# How it works
 
 - When a node connects no another it will receive a list of active node to connect to.
 - File sharing. When a node requests a file by its hash it will connect
