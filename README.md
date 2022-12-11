@@ -85,13 +85,13 @@ node.send_message(data, receiver=None)
   To receive messages simply extend the Node class:
  
  ```py
-    from pythonp2p import Node
-    
-    class Mynode(Node):
-      def on_message(message, sender, private):
-        # Gets called everytime there is a new message
-    node = Mynode()
-    node.start()
+ from pythonp2p import Node
+
+ class Mynode(Node):
+   def on_message(message, sender, private):
+     # Gets called everytime there is a new message
+ node = Mynode()
+ node.start()
  ```
 
 
