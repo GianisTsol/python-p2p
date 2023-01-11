@@ -2,7 +2,7 @@
 
 # python-p2p
 
-A totaly decentralized python peer to peer network.
+A totally decentralized python peer to peer network.
 
 The code provides a simple network structure for information exchange between peers.
 
