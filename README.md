@@ -2,7 +2,7 @@
 
 # python-p2p
 
-A totaly decentralized python peer to peer network.
+A totally decentralized python peer to peer network.
 
 The code provides a simple network structure for information exchange between peers.
 
@@ -30,7 +30,7 @@ from pythonp2p import Node
 
 #### Start
 
- Firstly you need to initialize the node and then start it. Look at blelow at [Receiving Data](#receiving-data) to learn how to extend he class first.
+ First, you need to initialize the node and then start it. Look at below at [Receiving Data](#receiving-data) to learn how to extend he class first.
 
  ```py
  node = Node(HOST, PORT, FILE_PORT)  # start the node
@@ -38,11 +38,11 @@ from pythonp2p import Node
  ```
 
 
-`HOST` (OPTIONAL): The host where the socket run on. Dont touch this if you dont have a weird network config. Default is "".
+`HOST` (OPTIONAL): The host where the socket runs on. Don't touch this if you don't have a weird network config. Default is "".
 
-`PORT` (OPTIONAL): the port where the nodes communicate. Default 65432
+`PORT` (OPTIONAL): The port where the nodes communicates. Default 65432
 
-`FILE_PORT` (OPTIONAL): the port which the server for file transfer is listening on. It is optional. Default 65433
+`FILE_PORT` (OPTIONAL): The port which the server for file transfer is listening on. Default 65433
 
 
 #### Connection
@@ -51,18 +51,18 @@ from pythonp2p import Node
 node.connect_to(ip)
 ```
 
-`ip`: The other nodes ip. After this all other known peers to the other node will be sent to you to connect to. This is automatic.
+`ip`: The other node's ip. After this all other known peers to the other node will be sent to you to connect to. This is automatic.
 
 
-`port` (OPTIONAL): default is the port the node is running on.
+`port` (OPTIONAL): The default is the port the node is running on.
 
 #### Saving state
-save current peers to a file.
+Save current peers to a file.
 ```py
 node.savestate(file)
 ```
 
-connect to previously discovered peers.
+Connect to previously discovered peers.
 ```py
 node.loadstate(file)
 ```
@@ -75,9 +75,9 @@ To broadcast data to the network you can do:
 node.send_message(data, receiver=None)
 ```
 
-`data`: dict to be sent to all other nodes.
+`data`: Dict to be sent to all other nodes.
 
-`receiver`: a string representing the id/public key of the node the message is for.
+`receiver`: A string representing the id/public key of the node the message is for.
   If specified the message will be encrypted and only that node will be able to receive and read it.
 
 
@@ -126,7 +126,7 @@ node.send_message(data, receiver=None)
 - File sharing. When a node requests a file by its hash it will connect
 to a node that has it and download it. Files can be shared by adding adding them via command. This can be expanded to become like torrents.
 - Peer discovery. Every node gets a list of neighbors when connected.
-- Messages run he entire network, so every node can get every info out there.
+- Messages run the entire network, so every node can get every info out there.
   This is not very good for big networks but it works on a small scale and sending
   rate can be edited for scale.
  - Public key encryption so private messages can be sent.
