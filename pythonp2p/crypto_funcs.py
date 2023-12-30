@@ -7,7 +7,7 @@ import json
 
 
 def generate_keys():
-    private_key = RSA.generate(1024)
+    private_key = RSA.generate(2048)
     public_key = private_key.publickey()
 
     return public_key, private_key
