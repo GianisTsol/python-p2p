@@ -80,7 +80,7 @@ def get_wanip_path(upnp_url):
         # I'm using the fact that a 'serviceType' element contains a single text node, who's data can
         # be accessed by the 'data' attribute.
         # When I find the right element, I take a step up into its parent and search for 'controlURL'
-        if service.childNodes[0].data.find("WANIPConnection") > 0:
+        if service.childNodes[0].data.find("WANIPConnection") > 0 or service.childNodes[0].data.find("WANPPPConnection") > 0:
             path = (
                 service.parentNode.getElementsByTagName("controlURL")[0]
                 .childNodes[0]
