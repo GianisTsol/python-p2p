@@ -2,6 +2,9 @@
 
 # python-p2p
 
+## Contribution: this project is open to contributions. Any contribution will be highly apreceated. Feel free to ask any questions related.
+
+
 A totally decentralized python peer to peer network.
 
 The code provides a simple network structure for information exchange between peers.
