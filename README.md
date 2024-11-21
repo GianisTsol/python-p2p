@@ -133,7 +133,7 @@ to a node that has it and download it. Files can be shared by adding adding them
   This is not very good for big networks but it works on a small scale and sending
   rate can be edited for scale.
  - Public key encryption so private messages can be sent.
- - Message signatures so no node van be impersonated.
+ - Message signatures so no node can be impersonated.
 
 - Nodes ping each other and decide if a node is dead.
 - more idk read the code
