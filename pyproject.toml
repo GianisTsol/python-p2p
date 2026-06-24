@@ -1,6 +1,6 @@
 [project]
 name="pythonp2p"
-version="1.7.1"
+version="1.7.2"
 description = "A peer to peer network able to transfer data and files"
 authors = [
     { name = "GianisTsol" }
